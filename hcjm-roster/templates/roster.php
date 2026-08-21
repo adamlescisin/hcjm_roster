@@ -13,7 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$positions = HCJM_Players::positions();
+$positions          = HCJM_Players::positions();
+$placeholder_att_id = (int) get_option( 'hcjm_placeholder_avatar', 0 );
+$placeholder_global = $placeholder_att_id ? wp_get_attachment_image_url( $placeholder_att_id, 'medium' ) : '';
 ?>
 <div class="hcjm hcjm-roster">
     <?php if ( empty( $players ) ) : ?>
@@ -21,15 +23,18 @@ $positions = HCJM_Players::positions();
     <?php else : ?>
         <div class="hcjm-cards">
             <?php foreach ( $players as $player ) :
-                $m = HCJM_Players::get_meta( $player->ID );
-                $photo_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'medium' ) : '';
+                $m         = HCJM_Players::get_meta( $player->ID );
+                $photo_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'medium' ) : $placeholder_global;
                 $pos_label = $positions[ $m['position'] ] ?? $m['position'];
                 $initials  = mb_substr( $m['first_name'], 0, 1 ) . mb_substr( $m['last_name'], 0, 1 );
             ?>
                 <div class="hcjm-card hcjm-player-card" data-position="<?php echo esc_attr( $m['position'] ); ?>">
                     <div class="hcjm-card-photo">
                         <?php if ( $photo_url ) : ?>
-                            <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $m['first_name'] . ' ' . $m['last_name'] ); ?>" loading="lazy">
+                            <img src="<?php echo esc_url( $photo_url ); ?>"
+                                 alt="<?php echo esc_attr( $m['first_name'] . ' ' . $m['last_name'] ); ?>"
+                                 loading="lazy"
+                                 class="<?php echo ( ! $m['photo_id'] && $placeholder_global ) ? 'hcjm-photo-placeholder-img' : ''; ?>">
                         <?php else : ?>
                             <div class="hcjm-photo-placeholder">
                                 <?php if ( $has_jersey && $m['jersey'] ) : ?>

@@ -17,6 +17,7 @@
 .hcjm-add-btn { margin-bottom: 0; }
 .hcjm-season-filter { margin: 12px 0; }
 .hcjm-matches-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.hcjm-players-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
 
 .hcjm-badge {
     display: inline-block;

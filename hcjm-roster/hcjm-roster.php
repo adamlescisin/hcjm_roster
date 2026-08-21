@@ -33,6 +33,7 @@ require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-players.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-staff.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-matches.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-scraper.php';
+require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-player-importer.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-cron.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-shortcodes.php';
 require_once HCJM_PLUGIN_DIR . 'admin/class-hcjm-admin.php';
@@ -79,7 +80,8 @@ function hcjm_run(): void {
         $loader->add_action( 'admin_post_hcjm_delete_player', $admin, 'handle_delete_player' );
         $loader->add_action( 'admin_post_hcjm_save_staff',  $admin, 'handle_save_staff' );
         $loader->add_action( 'admin_post_hcjm_delete_staff', $admin, 'handle_delete_staff' );
-        $loader->add_action( 'admin_post_hcjm_sync_matches', $admin, 'handle_sync_matches' );
+        $loader->add_action( 'admin_post_hcjm_sync_matches',    $admin, 'handle_sync_matches' );
+        $loader->add_action( 'admin_post_hcjm_import_players',  $admin, 'handle_import_players' );
         $loader->add_action( 'admin_post_hcjm_delete_match', $admin, 'handle_delete_match' );
     }
 

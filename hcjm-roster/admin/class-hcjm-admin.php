@@ -47,8 +47,9 @@ class HCJM_Admin {
     // -------------------------------------------------------------------------
 
     public function register_settings(): void {
-        register_setting( 'hcjm_settings_group', 'hcjm_current_season', 'sanitize_text_field' );
-        register_setting( 'hcjm_settings_group', 'hcjm_cron_interval',  'sanitize_text_field' );
+        register_setting( 'hcjm_settings_group', 'hcjm_current_season',      'sanitize_text_field' );
+        register_setting( 'hcjm_settings_group', 'hcjm_cron_interval',       'sanitize_text_field' );
+        register_setting( 'hcjm_settings_group', 'hcjm_placeholder_avatar',  'absint' );
     }
 
     // -------------------------------------------------------------------------
@@ -190,6 +191,15 @@ class HCJM_Admin {
                             <p class="description"><?php esc_html_e( 'Např. 208 (z URL: filter[league]=208)', HCJM_TEXT_DOMAIN ); ?></p>
                         </td>
                     </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'URL pro import hráčů', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <?php $import_url = get_post_meta( $team_id, '_hcjm_team_import_url', true ); ?>
+                            <input type="url" name="import_url" class="large-text" value="<?php echo esc_attr( $import_url ); ?>"
+                                placeholder="https://hcjuniormelnik.cz/muzstvo/...">
+                            <p class="description"><?php esc_html_e( 'URL stránky s hráči na hcjuniormelnik.cz. Import se provede ze záložky Hráči.', HCJM_TEXT_DOMAIN ); ?></p>
+                        </td>
+                    </tr>
                 </table>
 
                 <?php submit_button( __( 'Uložit', HCJM_TEXT_DOMAIN ) ); ?>
@@ -231,9 +241,35 @@ class HCJM_Admin {
                 </label>
             </form>
 
-            <a href="<?php echo esc_url( $this->admin_url( [ 'section' => 'edit-player', 'team' => $team_id, 'season' => $season ] ) ); ?>" class="button button-primary hcjm-add-btn">
-                + <?php esc_html_e( 'Přidat hráče', HCJM_TEXT_DOMAIN ); ?>
-            </a>
+            <div class="hcjm-players-toolbar">
+                <a href="<?php echo esc_url( $this->admin_url( [ 'section' => 'edit-player', 'team' => $team_id, 'season' => $season ] ) ); ?>" class="button button-primary">
+                    + <?php esc_html_e( 'Přidat hráče', HCJM_TEXT_DOMAIN ); ?>
+                </a>
+                <?php $import_url = get_post_meta( $team_id, '_hcjm_team_import_url', true ); ?>
+                <?php if ( $import_url ) : ?>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+                    <?php wp_nonce_field( 'hcjm_import_players_' . $team_id, 'hcjm_nonce' ); ?>
+                    <input type="hidden" name="action"   value="hcjm_import_players">
+                    <input type="hidden" name="team_id"  value="<?php echo esc_attr( $team_id ); ?>">
+                    <input type="hidden" name="season"   value="<?php echo esc_attr( $season ); ?>">
+                    <button type="submit" class="button button-secondary">
+                        &#8635; <?php esc_html_e( 'Importovat hráče z webu klubu', HCJM_TEXT_DOMAIN ); ?>
+                    </button>
+                </form>
+                <?php else : ?>
+                <span class="description" style="line-height:30px;margin-left:8px">
+                    <?php
+                    printf(
+                        wp_kses(
+                            __( '(<a href="%s">Nastav import URL</a> pro automatický import hráčů)', HCJM_TEXT_DOMAIN ),
+                            [ 'a' => [ 'href' => [] ] ]
+                        ),
+                        esc_url( $this->admin_url( [ 'section' => 'edit-team', 'edit' => $team_id ] ) )
+                    );
+                    ?>
+                </span>
+                <?php endif; ?>
+            </div>
 
             <table class="wp-list-table widefat fixed striped hcjm-table" style="margin-top:16px">
                 <thead>
@@ -706,6 +742,34 @@ class HCJM_Admin {
                             </select>
                         </td>
                     </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Výchozí fotka hráče', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <?php
+                            $placeholder_id  = (int) get_option( 'hcjm_placeholder_avatar', 0 );
+                            $placeholder_url = $placeholder_id ? wp_get_attachment_image_url( $placeholder_id, 'thumbnail' ) : '';
+                            ?>
+                            <input type="hidden" name="hcjm_placeholder_avatar" id="hcjm_placeholder_avatar" value="<?php echo esc_attr( $placeholder_id ); ?>">
+                            <div id="hcjm_placeholder_preview" style="margin-bottom:8px">
+                                <?php if ( $placeholder_url ) : ?>
+                                    <img src="<?php echo esc_url( $placeholder_url ); ?>" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd">
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="button hcjm-upload-btn"
+                                data-target="hcjm_placeholder_avatar"
+                                data-preview="hcjm_placeholder_preview">
+                                <?php esc_html_e( 'Vybrat obrázek', HCJM_TEXT_DOMAIN ); ?>
+                            </button>
+                            <?php if ( $placeholder_id ) : ?>
+                                <button type="button" class="button hcjm-remove-photo"
+                                    data-target="hcjm_placeholder_avatar"
+                                    data-preview="hcjm_placeholder_preview">
+                                    <?php esc_html_e( 'Odebrat', HCJM_TEXT_DOMAIN ); ?>
+                                </button>
+                            <?php endif; ?>
+                            <p class="description"><?php esc_html_e( 'Zobrazí se místo iniciál tam, kde hráč nemá vlastní fotku.', HCJM_TEXT_DOMAIN ); ?></p>
+                        </td>
+                    </tr>
                 </table>
                 <?php submit_button( __( 'Uložit nastavení', HCJM_TEXT_DOMAIN ) ); ?>
             </form>
@@ -766,6 +830,7 @@ class HCJM_Admin {
         update_post_meta( $team_id, '_hcjm_team_jersey_numbers', isset( $_POST['jersey_numbers'] ) ? '1' : '0' );
         update_post_meta( $team_id, '_hcjm_team_external_id',   sanitize_text_field( $_POST['external_id'] ?? '' ) );
         update_post_meta( $team_id, '_hcjm_team_league_id',     sanitize_text_field( $_POST['league_id'] ?? '' ) );
+        update_post_meta( $team_id, '_hcjm_team_import_url',    esc_url_raw( $_POST['import_url'] ?? '' ) );
 
         wp_safe_redirect( $this->admin_url( [], true ) . '&hcjm_notice=team_saved' );
         exit;
@@ -899,6 +964,32 @@ class HCJM_Admin {
         exit;
     }
 
+    public function handle_import_players(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
+        }
+        $team_id = absint( $_POST['team_id'] ?? 0 );
+        check_admin_referer( 'hcjm_import_players_' . $team_id, 'hcjm_nonce' );
+
+        $season = sanitize_text_field( $_POST['season'] ?? HCJM_Matches::current_season() );
+        $result = HCJM_Player_Importer::import_team( $team_id, $season );
+
+        $notice = $result['errors']
+            ? 'import_error'
+            : 'import_done';
+
+        // Store result for display
+        set_transient( 'hcjm_import_result_' . get_current_user_id(), $result, 60 );
+
+        wp_safe_redirect(
+            $this->admin_url( [ 'section' => 'players', 'team' => $team_id, 'season' => $season ], true )
+            . '&hcjm_notice=' . $notice
+            . '&imported=' . $result['imported']
+            . '&skipped='  . $result['skipped']
+        );
+        exit;
+    }
+
     public function handle_delete_match(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
@@ -945,6 +1036,15 @@ class HCJM_Admin {
             'match_deleted' => __( 'Zápas byl smazán.', HCJM_TEXT_DOMAIN ),
             'sync_done'     => sprintf(
                 __( 'Synchronizace dokončena. Importováno %d zápasů.', HCJM_TEXT_DOMAIN ),
+                absint( $_GET['imported'] ?? 0 )
+            ),
+            'import_done'   => sprintf(
+                __( 'Import hráčů dokončen. Importováno: %d, přeskočeno: %d.', HCJM_TEXT_DOMAIN ),
+                absint( $_GET['imported'] ?? 0 ),
+                absint( $_GET['skipped']  ?? 0 )
+            ),
+            'import_error'  => sprintf(
+                __( 'Import hráčů dokončen s chybami. Importováno: %d. Podrobnosti viz transient hcjm_import_result.', HCJM_TEXT_DOMAIN ),
                 absint( $_GET['imported'] ?? 0 )
             ),
             'error'         => __( 'Nastala chyba. Zkuste to znovu.', HCJM_TEXT_DOMAIN ),

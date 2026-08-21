@@ -365,6 +365,12 @@
     color: var(--hcjm-text-muted);
 }
 
+/* placeholder avatar image (globally configured) */
+.hcjm-photo-placeholder-img {
+    opacity: 0.55;
+    filter: grayscale(40%);
+}
+
 /* ── Position filter bar (added by JS) ──────────────────────── */
 .hcjm-filter-bar {
     display: flex;

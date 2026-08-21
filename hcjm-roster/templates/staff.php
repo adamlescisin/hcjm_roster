@@ -16,10 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
     <?php if ( empty( $members ) ) : ?>
         <p class="hcjm-empty"><?php esc_html_e( 'Realizační tým pro tuto sezónu není zatím k dispozici.', HCJM_TEXT_DOMAIN ); ?></p>
     <?php else : ?>
+        <?php
+        $placeholder_att_id = (int) get_option( 'hcjm_placeholder_avatar', 0 );
+        $placeholder_global = $placeholder_att_id ? wp_get_attachment_image_url( $placeholder_att_id, 'medium' ) : '';
+        ?>
         <div class="hcjm-cards hcjm-staff-cards">
             <?php foreach ( $members as $member ) :
                 $m         = HCJM_Staff::get_meta( $member->ID );
-                $photo_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'medium' ) : '';
+                $photo_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'medium' ) : $placeholder_global;
                 $initials  = mb_substr( $m['first_name'], 0, 1 ) . mb_substr( $m['last_name'], 0, 1 );
                 $is_email  = filter_var( $m['contact'], FILTER_VALIDATE_EMAIL );
                 $is_phone  = $m['contact'] && ! $is_email;
@@ -27,7 +31,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="hcjm-card hcjm-staff-card">
                     <div class="hcjm-card-photo">
                         <?php if ( $photo_url ) : ?>
-                            <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $m['first_name'] . ' ' . $m['last_name'] ); ?>" loading="lazy">
+                            <img src="<?php echo esc_url( $photo_url ); ?>"
+                                 alt="<?php echo esc_attr( $m['first_name'] . ' ' . $m['last_name'] ); ?>"
+                                 loading="lazy"
+                                 class="<?php echo ( ! $m['photo_id'] && $placeholder_global ) ? 'hcjm-photo-placeholder-img' : ''; ?>">
                         <?php else : ?>
                             <div class="hcjm-photo-placeholder">
                                 <span class="hcjm-initials"><?php echo esc_html( $initials ); ?></span>
