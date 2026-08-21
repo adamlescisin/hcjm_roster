@@ -1,426 +1,632 @@
 /* ============================================================
    HCJM Roster — Public Styles
-   Modern card-based, responsive, dark-mode aware.
-   CSS custom properties for easy theming.
+   Token layer mirrors the Design System used in ui_kits/website/index.html
+   (colors, typography, spacing, elevation, motion token names match the DS).
    ============================================================ */
 
-/* ── Design tokens ──────────────────────────────────────────── */
+/* ── Primitive palette ─────────────────────────────────────── */
 :root {
-    --hcjm-primary:       #003580;
-    --hcjm-primary-light: #1a4fa8;
-    --hcjm-accent:        #d9000d;
-    --hcjm-bg:            #f4f6f9;
-    --hcjm-card-bg:       #ffffff;
-    --hcjm-border:        #dde1e7;
-    --hcjm-text:          #1a1d23;
-    --hcjm-text-muted:    #5c6370;
-    --hcjm-win-bg:        #e8f5e9;
-    --hcjm-win-color:     #1b5e20;
-    --hcjm-loss-bg:       #ffebee;
-    --hcjm-loss-color:    #b71c1c;
-    --hcjm-draw-bg:       #fff8e1;
-    --hcjm-draw-color:    #5d4037;
-    --hcjm-radius:        10px;
-    --hcjm-shadow:        0 2px 8px rgba(0,0,0,.08);
-    --hcjm-transition:    0.2s ease;
+  --_navy-950: #060f22;
+  --_navy-900: #0a1f44;
+  --_navy-800: #0d2855;
+  --_navy-700: #103166;
+  --_navy-600: #154999;
+  --_navy-500: #1a5dbf;
+  --_navy-400: #2e73d4;
+  --_navy-200: #8db4e8;
+  --_navy-100: #c8ddf5;
+  --_navy-50:  #e8f0fb;
 
-    /* Position colours */
-    --hcjm-pos-gk:        #f57c00;
-    --hcjm-pos-def:       #1565c0;
-    --hcjm-pos-fwd:       #c62828;
+  --_red-700:  #a50008;
+  --_red-600:  #d9000d;
+  --_red-100:  #ffebee;
+
+  --_green-800: #065f46;
+  --_green-500: #10b981;
+  --_green-50:  #ecfdf5;
+
+  --_amber-700: #92400e;
+  --_amber-400: #f59e0b;
+  --_amber-50:  #fffbeb;
+
+  --_neutral-950: #0e1117;
+  --_neutral-900: #11141a;
+  --_neutral-800: #1c2130;
+  --_neutral-700: #2d3340;
+  --_neutral-600: #44505f;
+  --_neutral-500: #5c6a7a;
+  --_neutral-400: #7d8fa3;
+  --_neutral-300: #a8b6c5;
+  --_neutral-200: #c8d3df;
+  --_neutral-100: #e0e8f0;
+  --_neutral-50:  #f2f5f8;
+  --_white:       #ffffff;
 }
 
+/* ── DS semantic tokens (light mode) ───────────────────────── */
+:root {
+  /* Surfaces */
+  --surface-page:   var(--_neutral-50);
+  --surface-card:   var(--_white);
+  --surface-raised: var(--_white);
+  --surface-nav:    var(--_navy-900);
+  --surface-accent: var(--_navy-600);
+  --surface-muted:  var(--_neutral-100);
+
+  /* Text */
+  --text-heading:   var(--_neutral-950);
+  --text-body:      var(--_neutral-800);
+  --text-muted:     var(--_neutral-500);
+  --text-subtle:    var(--_neutral-400);
+  --text-link:      var(--_navy-600);
+  --text-link-hover: var(--_navy-800);
+  --text-on-dark:   var(--_white);
+
+  /* Borders */
+  --border-subtle:  var(--_neutral-100);
+  --border-default: var(--_neutral-200);
+  --border-strong:  var(--_neutral-300);
+
+  /* Typography */
+  --font-body:    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-body);
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Spacing (4-pt scale) */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+  --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+
+  /* Elevation */
+  --elevation-1: 0 1px 2px rgba(10,31,68,.06), 0 1px 3px rgba(10,31,68,.04);
+  --elevation-2: 0 2px 8px rgba(10,31,68,.08), 0 1px 3px rgba(10,31,68,.05);
+  --elevation-3: 0 6px 20px rgba(10,31,68,.10), 0 3px 6px rgba(10,31,68,.06);
+  --elevation-4: 0 12px 36px rgba(10,31,68,.13), 0 6px 12px rgba(10,31,68,.07);
+
+  /* Motion */
+  --motion-fast:   0.12s ease;
+  --motion-normal: 0.22s ease;
+  --motion-slow:   0.35s cubic-bezier(.4,0,.2,1);
+
+  /* Radii */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full: 9999px;
+
+  /* Result states */
+  --surface-win:  var(--_green-50);
+  --border-win:   var(--_green-500);
+  --text-win:     var(--_green-800);
+
+  --surface-loss: var(--_red-100);
+  --border-loss:  var(--_red-600);
+  --text-loss:    var(--_red-700);
+
+  --surface-draw: var(--_amber-50);
+  --border-draw:  var(--_amber-400);
+  --text-draw:    var(--_amber-700);
+
+  /* Position tags */
+  --tag-gk-bg:   #fff7e6; --tag-gk-text:  #b45309; --tag-gk-border:  #fbbf24;
+  --tag-def-bg:  #eff6ff; --tag-def-text: #1d4ed8; --tag-def-border: #93c5fd;
+  --tag-fwd-bg:  #fef2f2; --tag-fwd-text: #b91c1c; --tag-fwd-border: #fca5a5;
+
+  /* Legacy aliases (backward compat with existing markup) */
+  --hcjm-primary:       var(--_navy-600);
+  --hcjm-primary-light: var(--_navy-400);
+  --hcjm-accent:        var(--_red-600);
+  --hcjm-bg:            var(--surface-page);
+  --hcjm-card-bg:       var(--surface-card);
+  --hcjm-border:        var(--border-subtle);
+  --hcjm-text:          var(--text-body);
+  --hcjm-text-muted:    var(--text-muted);
+  --hcjm-shadow:        var(--elevation-2);
+  --hcjm-radius:        var(--radius-md);
+  --hcjm-transition:    var(--motion-normal);
+  --hcjm-win-bg:        var(--surface-win);
+  --hcjm-win-color:     var(--text-win);
+  --hcjm-loss-bg:       var(--surface-loss);
+  --hcjm-loss-color:    var(--text-loss);
+  --hcjm-draw-bg:       var(--surface-draw);
+  --hcjm-draw-color:    var(--text-draw);
+  --hcjm-pos-gk:        var(--tag-gk-text);
+  --hcjm-pos-def:       var(--tag-def-text);
+  --hcjm-pos-fwd:       var(--tag-fwd-text);
+}
+
+/* ── Dark mode overrides ────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --hcjm-primary:       #5585e0;
-        --hcjm-primary-light: #7ba3f0;
-        --hcjm-accent:        #ff4d55;
-        --hcjm-bg:            #12151a;
-        --hcjm-card-bg:       #1e2330;
-        --hcjm-border:        #2d3347;
-        --hcjm-text:          #e8ebf0;
-        --hcjm-text-muted:    #8b93a5;
-        --hcjm-win-bg:        #1a3320;
-        --hcjm-win-color:     #69f09a;
-        --hcjm-loss-bg:       #351b1d;
-        --hcjm-loss-color:    #ff8a80;
-        --hcjm-draw-bg:       #2d2a18;
-        --hcjm-draw-color:    #ffe082;
-        --hcjm-shadow:        0 2px 8px rgba(0,0,0,.3);
-    }
+  :root:not([data-theme="light"]) {
+    --surface-page:   var(--_neutral-950);
+    --surface-card:   var(--_neutral-800);
+    --surface-raised: var(--_neutral-800);
+    --surface-muted:  var(--_neutral-900);
+    --text-heading:   var(--_white);
+    --text-body:      var(--_neutral-200);
+    --text-muted:     var(--_neutral-400);
+    --text-subtle:    var(--_neutral-500);
+    --text-link:      var(--_navy-200);
+    --text-link-hover: var(--_navy-100);
+    --border-subtle:  rgba(255,255,255,.06);
+    --border-default: rgba(255,255,255,.12);
+    --border-strong:  rgba(255,255,255,.20);
+    --elevation-1: 0 1px 2px rgba(0,0,0,.25);
+    --elevation-2: 0 2px 8px rgba(0,0,0,.30);
+    --elevation-3: 0 6px 20px rgba(0,0,0,.35);
+    --elevation-4: 0 12px 36px rgba(0,0,0,.40);
+    --surface-win:  #0d2e1c; --border-win:  #10b981; --text-win:  #6ee7b7;
+    --surface-loss: #2a0e0e; --border-loss: #ef4444; --text-loss: #fca5a5;
+    --surface-draw: #2a2007; --border-draw: #f59e0b; --text-draw: #fcd34d;
+    --tag-gk-bg:  #2d1e02; --tag-gk-text:  #fbbf24; --tag-gk-border:  #92400e;
+    --tag-def-bg: #0f1e3d; --tag-def-text: #93c5fd; --tag-def-border: #1d4ed8;
+    --tag-fwd-bg: #2a0b0b; --tag-fwd-text: #fca5a5; --tag-fwd-border: #b91c1c;
+  }
 }
-
 :root[data-theme="dark"] {
-    --hcjm-primary:       #5585e0;
-    --hcjm-primary-light: #7ba3f0;
-    --hcjm-accent:        #ff4d55;
-    --hcjm-bg:            #12151a;
-    --hcjm-card-bg:       #1e2330;
-    --hcjm-border:        #2d3347;
-    --hcjm-text:          #e8ebf0;
-    --hcjm-text-muted:    #8b93a5;
-    --hcjm-win-bg:        #1a3320;
-    --hcjm-win-color:     #69f09a;
-    --hcjm-loss-bg:       #351b1d;
-    --hcjm-loss-color:    #ff8a80;
-    --hcjm-draw-bg:       #2d2a18;
-    --hcjm-draw-color:    #ffe082;
-    --hcjm-shadow:        0 2px 8px rgba(0,0,0,.3);
+  --surface-page:   var(--_neutral-950);
+  --surface-card:   var(--_neutral-800);
+  --surface-raised: var(--_neutral-800);
+  --surface-muted:  var(--_neutral-900);
+  --text-heading:   var(--_white);
+  --text-body:      var(--_neutral-200);
+  --text-muted:     var(--_neutral-400);
+  --text-subtle:    var(--_neutral-500);
+  --text-link:      var(--_navy-200);
+  --text-link-hover: var(--_navy-100);
+  --border-subtle:  rgba(255,255,255,.06);
+  --border-default: rgba(255,255,255,.12);
+  --border-strong:  rgba(255,255,255,.20);
+  --elevation-1: 0 1px 2px rgba(0,0,0,.25);
+  --elevation-2: 0 2px 8px rgba(0,0,0,.30);
+  --elevation-3: 0 6px 20px rgba(0,0,0,.35);
+  --elevation-4: 0 12px 36px rgba(0,0,0,.40);
+  --surface-win:  #0d2e1c; --border-win:  #10b981; --text-win:  #6ee7b7;
+  --surface-loss: #2a0e0e; --border-loss: #ef4444; --text-loss: #fca5a5;
+  --surface-draw: #2a2007; --border-draw: #f59e0b; --text-draw: #fcd34d;
+  --tag-gk-bg:  #2d1e02; --tag-gk-text:  #fbbf24; --tag-gk-border:  #92400e;
+  --tag-def-bg: #0f1e3d; --tag-def-text: #93c5fd; --tag-def-border: #1d4ed8;
+  --tag-fwd-bg: #2a0b0b; --tag-fwd-text: #fca5a5; --tag-fwd-border: #b91c1c;
 }
 
-/* ── Base wrapper ────────────────────────────────────────────── */
+/* ── Base ───────────────────────────────────────────────────── */
 .hcjm {
-    color: var(--hcjm-text);
-    font-family: inherit;
-    line-height: 1.5;
+  color: var(--text-body);
+  font-family: var(--font-body);
+  line-height: 1.55;
+  background: transparent;
 }
-
 .hcjm-empty {
-    color: var(--hcjm-text-muted);
-    font-style: italic;
-    padding: 1.5rem 0;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: var(--sp-5) 0;
+}
+.hcjm-error { color: var(--_red-600); font-weight: var(--font-weight-semibold); }
+
+/* ── SectionHeading — matches DS SectionHeading component ─── */
+.hcjm-section-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+.hcjm-section-heading::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 1.5em;
+  background: var(--_navy-600);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.hcjm-section-heading h2,
+.hcjm-section-heading h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
 }
 
-.hcjm-error {
-    color: var(--hcjm-accent);
-    font-weight: 600;
+/* ── Tag — matches DS Tag component ─────────────────────────── */
+.hcjm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: 2px 9px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1.6;
 }
 
-/* ── Card grid (shared by roster & staff) ────────────────────── */
+/* ── Card grid — matches DS Card layout ──────────────────────── */
 .hcjm-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1.25rem;
-    padding: 0.5rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: var(--sp-5);
+  padding: var(--sp-1) 0;
 }
-
 .hcjm-staff-cards {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 /* ── Card base ───────────────────────────────────────────────── */
 .hcjm-card {
-    background: var(--hcjm-card-bg);
-    border: 1px solid var(--hcjm-border);
-    border-radius: var(--hcjm-radius);
-    box-shadow: var(--hcjm-shadow);
-    overflow: hidden;
-    transition: transform var(--hcjm-transition), box-shadow var(--hcjm-transition);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-1);
+  overflow: hidden;
+  transition:
+    transform var(--motion-normal),
+    box-shadow var(--motion-normal);
 }
-
 .hcjm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  transform: translateY(-3px);
+  box-shadow: var(--elevation-3);
 }
 
 /* ── Card photo area ─────────────────────────────────────────── */
 .hcjm-card-photo {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    overflow: hidden;
-    background: var(--hcjm-bg);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--surface-muted);
 }
-
 .hcjm-card-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+}
+.hcjm-card:hover .hcjm-card-photo img {
+  transform: scale(1.04);
 }
 
+/* photo placeholder gradient */
 .hcjm-photo-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--hcjm-primary) 0%, var(--hcjm-primary-light) 100%);
-    color: #fff;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--_navy-800) 0%, var(--_navy-500) 100%);
 }
-
 .hcjm-jersey-placeholder {
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: -0.05em;
-    line-height: 1;
-    opacity: 0.85;
+  font-size: 3.5rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: -0.06em;
+  color: rgba(255,255,255,.65);
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
 }
-
 .hcjm-initials {
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    opacity: 0.85;
-}
-
-/* jersey badge overlay */
-.hcjm-jersey-badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: var(--hcjm-accent);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 4px;
-    padding: 2px 6px;
-    line-height: 1.3;
-    min-width: 26px;
-    text-align: center;
-}
-
-/* ── Card body ───────────────────────────────────────────────── */
-.hcjm-card-body {
-    padding: 0.75rem 0.875rem;
-}
-
-/* ── Player card specifics ───────────────────────────────────── */
-.hcjm-player-name {
-    font-size: 0.95rem;
-    line-height: 1.3;
-    margin-bottom: 0.4rem;
-}
-
-.hcjm-player-firstname {
-    display: block;
-    color: var(--hcjm-text-muted);
-    font-size: 0.8rem;
-}
-
-.hcjm-player-lastname {
-    font-weight: 700;
-    font-size: 1rem;
-    color: var(--hcjm-text);
-}
-
-.hcjm-player-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.hcjm-position {
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-radius: 3px;
-    padding: 2px 6px;
-    color: #fff;
-}
-
-.hcjm-pos-brankár,
-.hcjm-pos-brankáø {
-    background: var(--hcjm-pos-gk);
-}
-
-.hcjm-pos-obrance {
-    background: var(--hcjm-pos-def);
-}
-
-.hcjm-pos-utocnik {
-    background: var(--hcjm-pos-fwd);
-}
-
-.hcjm-birth-year {
-    font-size: 0.78rem;
-    color: var(--hcjm-text-muted);
-}
-
-/* ── Staff card specifics ────────────────────────────────────── */
-.hcjm-staff-name {
-    font-weight: 700;
-    font-size: 0.95rem;
-    margin-bottom: 0.2rem;
-    color: var(--hcjm-text);
-}
-
-.hcjm-staff-role {
-    font-size: 0.82rem;
-    color: var(--hcjm-primary);
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-}
-
-.hcjm-staff-contact {
-    font-size: 0.78rem;
-    color: var(--hcjm-text-muted);
-    word-break: break-all;
-}
-
-.hcjm-staff-contact a {
-    color: var(--hcjm-primary);
-    text-decoration: none;
-}
-
-.hcjm-staff-contact a:hover {
-    text-decoration: underline;
-}
-
-/* ── Matches: row-based layout ───────────────────────────────── */
-.hcjm-matches-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.hcjm-match-row {
-    display: grid;
-    grid-template-columns: 10rem 1fr auto;
-    align-items: center;
-    gap: 1rem;
-    background: var(--hcjm-card-bg);
-    border: 1px solid var(--hcjm-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    box-shadow: var(--hcjm-shadow);
-    transition: background var(--hcjm-transition);
-}
-
-.hcjm-match-row.hcjm-win {
-    background: var(--hcjm-win-bg);
-    border-color: var(--hcjm-win-color);
-}
-
-.hcjm-match-row.hcjm-loss {
-    background: var(--hcjm-loss-bg);
-    border-color: var(--hcjm-loss-color);
-}
-
-.hcjm-match-row.hcjm-draw {
-    background: var(--hcjm-draw-bg);
-    border-color: var(--hcjm-draw-color);
-}
-
-.hcjm-match-date {
-    font-size: 0.85rem;
-    color: var(--hcjm-text-muted);
-    white-space: nowrap;
-}
-
-.hcjm-match-teams {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-}
-
-.hcjm-match-badge {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-radius: 4px;
-    padding: 2px 8px;
-    color: #fff;
-    white-space: nowrap;
-}
-
-.hcjm-match-badge.hcjm-home {
-    background: var(--hcjm-primary);
-}
-
-.hcjm-match-badge.hcjm-away {
-    background: var(--hcjm-text-muted);
-}
-
-.hcjm-match-opponent {
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.hcjm-match-score {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.2rem;
-    min-width: 5rem;
-}
-
-.hcjm-score {
-    font-size: 1.2rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    color: var(--hcjm-text);
-}
-
-.hcjm-result,
-.hcjm-planned {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: 3px;
-    padding: 2px 6px;
-}
-
-.hcjm-result-win  { background: var(--hcjm-win-color);  color: #fff; }
-.hcjm-result-loss { background: var(--hcjm-loss-color); color: #fff; }
-.hcjm-result-draw { background: var(--hcjm-draw-color); color: #fff; }
-
-.hcjm-planned {
-    background: var(--hcjm-border);
-    color: var(--hcjm-text-muted);
+  font-size: 2.2rem;
+  font-weight: var(--font-weight-bold);
+  color: rgba(255,255,255,.65);
+  letter-spacing: 0.05em;
 }
 
 /* placeholder avatar image (globally configured) */
 .hcjm-photo-placeholder-img {
-    opacity: 0.55;
-    filter: grayscale(40%);
+  opacity: 0.55;
+  filter: grayscale(30%);
 }
 
-/* ── Position filter bar (added by JS) ──────────────────────── */
+/* jersey badge — top-left corner chip */
+.hcjm-jersey-badge {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  background: var(--_red-600);
+  color: var(--_white);
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-sm);
+  padding: 2px 7px;
+  line-height: 1.4;
+  min-width: 26px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+
+/* ── Card body ───────────────────────────────────────────────── */
+.hcjm-card-body {
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Player card ─────────────────────────────────────────────── */
+.hcjm-player-name {
+  line-height: 1.2;
+  margin-bottom: var(--sp-2);
+}
+.hcjm-player-firstname {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: var(--font-weight-normal);
+}
+.hcjm-player-lastname {
+  font-size: 1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-heading);
+  letter-spacing: -0.01em;
+}
+.hcjm-player-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+/* Position tag — extends .hcjm-tag */
+.hcjm-position { }
+
+.hcjm-pos-brankár,
+.hcjm-pos-brankar,
+.hcjm-pos-brankáø {
+  background: var(--tag-gk-bg);
+  color: var(--tag-gk-text);
+  border-color: var(--tag-gk-border);
+}
+.hcjm-pos-obrance,
+.hcjm-pos-obránce {
+  background: var(--tag-def-bg);
+  color: var(--tag-def-text);
+  border-color: var(--tag-def-border);
+}
+.hcjm-pos-utocnik,
+.hcjm-pos-útočník {
+  background: var(--tag-fwd-bg);
+  color: var(--tag-fwd-text);
+  border-color: var(--tag-fwd-border);
+}
+
+.hcjm-birth-year {
+  font-size: 0.76rem;
+  color: var(--text-subtle);
+}
+
+/* ── Staff card ──────────────────────────────────────────────── */
+.hcjm-staff-name {
+  font-weight: var(--font-weight-bold);
+  font-size: 0.95rem;
+  color: var(--text-heading);
+  margin-bottom: var(--sp-1);
+  line-height: 1.3;
+}
+.hcjm-staff-role {
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-link);
+  margin-bottom: var(--sp-2);
+  letter-spacing: 0.01em;
+}
+.hcjm-staff-contact {
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.hcjm-staff-contact a {
+  color: var(--text-link);
+  text-decoration: none;
+  transition: color var(--motion-fast);
+}
+.hcjm-staff-contact a:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+/* ── MatchCard — matches DS MatchCard component ──────────────── */
+.hcjm-matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.hcjm-match-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr auto;
+  align-items: center;
+  gap: var(--sp-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+  box-shadow: var(--elevation-1);
+  transition:
+    box-shadow var(--motion-normal),
+    transform var(--motion-normal);
+}
+.hcjm-match-row:hover {
+  box-shadow: var(--elevation-2);
+  transform: translateX(2px);
+}
+
+/* Result accent on left border */
+.hcjm-match-row.hcjm-win {
+  border-left-color: var(--border-win);
+  background: var(--surface-win);
+}
+.hcjm-match-row.hcjm-loss {
+  border-left-color: var(--border-loss);
+  background: var(--surface-loss);
+}
+.hcjm-match-row.hcjm-draw {
+  border-left-color: var(--border-draw);
+  background: var(--surface-draw);
+}
+
+/* Date column */
+.hcjm-match-date {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+.hcjm-match-date strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-body);
+}
+
+/* Teams column */
+.hcjm-match-teams {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Home/Away badge */
+.hcjm-match-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.67rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-sm);
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.hcjm-match-badge.hcjm-home {
+  background: var(--_navy-600);
+  color: var(--_white);
+}
+.hcjm-match-badge.hcjm-away {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+}
+
+.hcjm-match-opponent {
+  font-weight: var(--font-weight-semibold);
+  font-size: 0.92rem;
+  color: var(--text-heading);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Score / status column */
+.hcjm-match-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-1);
+  min-width: 5rem;
+  text-align: right;
+}
+.hcjm-score {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.02em;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Result pill */
+.hcjm-result {
+  font-size: 0.68rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+}
+.hcjm-result-win  { background: var(--border-win);  color: var(--_white); }
+.hcjm-result-loss { background: var(--border-loss); color: var(--_white); }
+.hcjm-result-draw { background: var(--border-draw); color: var(--_white); }
+
+/* Planned status */
+.hcjm-planned {
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ── Position filter bar (JS-injected) ───────────────────────── */
 .hcjm-filter-bar {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
 }
-
 .hcjm-filter-btn {
-    background: var(--hcjm-card-bg);
-    border: 1px solid var(--hcjm-border);
-    border-radius: 6px;
-    color: var(--hcjm-text-muted);
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.35rem 0.875rem;
-    transition: background var(--hcjm-transition), color var(--hcjm-transition), border-color var(--hcjm-transition);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-semibold);
+  padding: var(--sp-1) var(--sp-4);
+  transition:
+    background var(--motion-fast),
+    color var(--motion-fast),
+    border-color var(--motion-fast);
 }
-
 .hcjm-filter-btn:hover {
-    border-color: var(--hcjm-primary);
-    color: var(--hcjm-primary);
+  border-color: var(--_navy-400);
+  color: var(--text-link);
 }
-
 .hcjm-filter-btn.active {
-    background: var(--hcjm-primary);
-    border-color: var(--hcjm-primary);
-    color: #fff;
+  background: var(--_navy-600);
+  border-color: var(--_navy-600);
+  color: var(--_white);
 }
 
-/* ── Responsive tweaks ───────────────────────────────────────── */
-@media (max-width: 600px) {
-    .hcjm-cards {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 0.875rem;
-    }
-
-    .hcjm-match-row {
-        grid-template-columns: 1fr;
-        gap: 0.4rem;
-    }
-
-    .hcjm-match-date {
-        font-size: 0.78rem;
-    }
-
-    .hcjm-match-score {
-        align-items: flex-start;
-        flex-direction: row;
-        gap: 0.5rem;
-    }
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .hcjm-cards {
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: var(--sp-3);
+  }
+  .hcjm-match-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+  }
+  .hcjm-match-date {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 0.77rem;
+  }
+  .hcjm-match-teams {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .hcjm-match-score {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-end;
+  }
+}
+@media (max-width: 400px) {
+  .hcjm-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

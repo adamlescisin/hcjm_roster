@@ -12,6 +12,11 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+$days_cs = [
+    'Mon' => 'Po', 'Tue' => 'Út', 'Wed' => 'St',
+    'Thu' => 'Čt', 'Fri' => 'Pá', 'Sat' => 'So', 'Sun' => 'Ne',
+];
 ?>
 <div class="hcjm hcjm-matches hcjm-matches-upcoming">
     <?php if ( empty( $matches ) ) : ?>
@@ -25,14 +30,27 @@ if ( ! defined( 'ABSPATH' ) ) {
                 $score     = HCJM_Matches::format_score( $match );
                 $date      = HCJM_Matches::format_date( $match );
                 $is_played = $match->status === 'played';
+
+                // Day-of-week prefix
+                $ts         = $match->match_date ? strtotime( $match->match_date ) : 0;
+                $day_abbr   = $ts ? ( $days_cs[ date( 'D', $ts ) ] ?? '' ) : '';
+                $time_str   = $ts ? date( 'H:i', $ts ) : '';
+
                 $row_class = '';
-                if ( $is_played && $won === true )  $row_class = 'hcjm-win';
-                if ( $is_played && $won === false ) $row_class = 'hcjm-loss';
-                if ( $is_played && $won === null )   $row_class = 'hcjm-draw';
+                if ( $is_played && $won === true )  { $row_class = 'hcjm-win'; }
+                if ( $is_played && $won === false )  { $row_class = 'hcjm-loss'; }
+                if ( $is_played && $won === null )   { $row_class = 'hcjm-draw'; }
             ?>
                 <div class="hcjm-match-row <?php echo esc_attr( $row_class ); ?>">
                     <div class="hcjm-match-date">
-                        <?php echo esc_html( $date ); ?>
+                        <?php if ( $day_abbr ) : ?>
+                            <strong><?php echo esc_html( $day_abbr . ' ' . $date ); ?></strong>
+                            <?php if ( $time_str && $time_str !== '00:00' ) : ?>
+                                <?php echo esc_html( $time_str ); ?>
+                            <?php endif; ?>
+                        <?php else : ?>
+                            <?php echo esc_html( $date ); ?>
+                        <?php endif; ?>
                     </div>
                     <div class="hcjm-match-teams">
                         <span class="hcjm-match-badge <?php echo $match->is_home ? 'hcjm-home' : 'hcjm-away'; ?>">

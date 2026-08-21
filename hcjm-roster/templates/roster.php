@@ -54,7 +54,7 @@ $placeholder_global = $placeholder_att_id ? wp_get_attachment_image_url( $placeh
                             <span class="hcjm-player-lastname"><?php echo esc_html( $m['last_name'] ); ?></span>
                         </div>
                         <div class="hcjm-player-meta">
-                            <span class="hcjm-position hcjm-pos-<?php echo esc_attr( $m['position'] ); ?>"><?php echo esc_html( $pos_label ); ?></span>
+                            <span class="hcjm-tag hcjm-position hcjm-pos-<?php echo esc_attr( $m['position'] ); ?>"><?php echo esc_html( $pos_label ); ?></span>
                             <?php if ( $m['birth_year'] ) : ?>
                                 <span class="hcjm-birth-year">*<?php echo esc_html( $m['birth_year'] ); ?></span>
                             <?php endif; ?>

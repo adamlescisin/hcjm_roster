@@ -11,6 +11,11 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+$days_cs = [
+    'Mon' => 'Po', 'Tue' => 'Út', 'Wed' => 'St',
+    'Thu' => 'Čt', 'Fri' => 'Pá', 'Sat' => 'So', 'Sun' => 'Ne',
+];
 ?>
 <div class="hcjm hcjm-matches hcjm-matches-past">
     <?php if ( empty( $matches ) ) : ?>
@@ -22,12 +27,21 @@ if ( ! defined( 'ABSPATH' ) ) {
                 $score = HCJM_Matches::format_score( $match );
                 $date  = HCJM_Matches::format_date( $match );
 
-                if ( $won === true )  $row_class = 'hcjm-win';
-                elseif ( $won === false ) $row_class = 'hcjm-loss';
-                else $row_class = 'hcjm-draw';
+                $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
+                $day_abbr = $ts ? ( $days_cs[ date( 'D', $ts ) ] ?? '' ) : '';
+
+                if ( $won === true )        { $row_class = 'hcjm-win'; }
+                elseif ( $won === false )   { $row_class = 'hcjm-loss'; }
+                else                        { $row_class = 'hcjm-draw'; }
             ?>
                 <div class="hcjm-match-row <?php echo esc_attr( $row_class ); ?>">
-                    <div class="hcjm-match-date"><?php echo esc_html( $date ); ?></div>
+                    <div class="hcjm-match-date">
+                        <?php if ( $day_abbr ) : ?>
+                            <strong><?php echo esc_html( $day_abbr . ' ' . $date ); ?></strong>
+                        <?php else : ?>
+                            <?php echo esc_html( $date ); ?>
+                        <?php endif; ?>
+                    </div>
                     <div class="hcjm-match-teams">
                         <span class="hcjm-match-badge <?php echo $match->is_home ? 'hcjm-home' : 'hcjm-away'; ?>">
                             <?php echo $match->is_home ? esc_html__( 'D', HCJM_TEXT_DOMAIN ) : esc_html__( 'V', HCJM_TEXT_DOMAIN ); ?>
@@ -37,11 +51,11 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <div class="hcjm-match-score">
                         <strong class="hcjm-score"><?php echo $score; ?></strong>
                         <?php if ( $won === true ) : ?>
-                            <span class="hcjm-result hcjm-result-win"><?php esc_html_e( 'V', HCJM_TEXT_DOMAIN ); ?></span>
+                            <span class="hcjm-result hcjm-result-win"><?php esc_html_e( 'Výhra', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php elseif ( $won === false ) : ?>
-                            <span class="hcjm-result hcjm-result-loss"><?php esc_html_e( 'P', HCJM_TEXT_DOMAIN ); ?></span>
+                            <span class="hcjm-result hcjm-result-loss"><?php esc_html_e( 'Prohra', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php else : ?>
-                            <span class="hcjm-result hcjm-result-draw"><?php esc_html_e( 'R', HCJM_TEXT_DOMAIN ); ?></span>
+                            <span class="hcjm-result hcjm-result-draw"><?php esc_html_e( 'Remíza', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php endif; ?>
                     </div>
                 </div>
