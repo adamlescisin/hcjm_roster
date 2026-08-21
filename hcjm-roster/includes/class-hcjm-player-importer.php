@@ -117,9 +117,10 @@ class HCJM_Player_Importer {
     /**
      * Parse player rows from the page HTML.
      *
-     * Tries multiple strategies:
-     *   1. Table with detectable header columns
-     *   2. Heuristic row parsing (number + name + year pattern)
+     * Tries multiple strategies in order:
+     *   1. Position-section headings (Brankáři / Obránci / Útočníci → following table)
+     *   2. All tables with detectable header columns (single-table layout)
+     *   3. Heuristic row parsing (number + name + year pattern)
      *
      * @param string $html
      * @return array<int,array{first_name:string,last_name:string,birth_year:string,position:string,jersey:string}>
@@ -132,25 +133,127 @@ class HCJM_Player_Importer {
 
         $xpath = new DOMXPath( $dom );
 
-        // Strategy 1: table with header row
-        $players = self::parse_table_with_headers( $xpath );
+        // Strategy 1: sectioned layout — heading per position, each with its own table
+        $players = self::parse_position_sections( $xpath );
         if ( ! empty( $players ) ) {
             return $players;
         }
 
-        // Strategy 2: heuristic table parsing
+        // Strategy 2: single or multiple tables with header rows (collects from ALL tables)
+        $players = self::parse_all_tables_with_headers( $xpath );
+        if ( ! empty( $players ) ) {
+            return $players;
+        }
+
+        // Strategy 3: heuristic table parsing
         return self::parse_heuristic( $xpath );
     }
 
     /**
+     * Strategy 1: find heading elements whose text names a position
+     * (Brankáři / Obránci / Útočníci) and parse the table that immediately
+     * follows each heading in the DOM.  Only activates when at least two
+     * distinct position headings are found (i.e. a true sectioned layout).
+     *
      * @param DOMXPath $xpath
      * @return array<int,array<string,string>>
      */
-    private static function parse_table_with_headers( DOMXPath $xpath ): array {
+    private static function parse_position_sections( DOMXPath $xpath ): array {
+        $heading_nodes = $xpath->query( '//h1 | //h2 | //h3 | //h4 | //h5 | //h6' );
+        if ( ! $heading_nodes ) {
+            return [];
+        }
+
+        // Collect headings that name a hockey position
+        $pos_headings = [];
+        foreach ( $heading_nodes as $node ) {
+            $text = mb_strtolower( trim( $node->textContent ) );
+            $pos  = self::position_from_heading( $text );
+            if ( $pos ) {
+                $pos_headings[] = [ 'node' => $node, 'pos' => $pos ];
+            }
+        }
+
+        // Require at least 2 distinct position sections to consider this a sectioned page
+        if ( count( $pos_headings ) < 2 ) {
+            return [];
+        }
+
+        $players     = [];
+        $seen_tables = [];
+
+        foreach ( $pos_headings as $entry ) {
+            // Find the first table that comes after this heading in document order
+            $following = $xpath->query( 'following::table[1]', $entry['node'] );
+            if ( ! $following || $following->length === 0 ) {
+                continue;
+            }
+
+            $table    = $following->item( 0 );
+            $table_id = spl_object_id( $table );
+
+            if ( isset( $seen_tables[ $table_id ] ) ) {
+                continue; // same table already processed (two headings pointing to same table)
+            }
+            $seen_tables[ $table_id ] = true;
+
+            $rows    = $xpath->query( './/tr', $table );
+            $col_map = null;
+
+            foreach ( $rows as $i => $row ) {
+                // Detect column layout from first row
+                if ( $i === 0 ) {
+                    $th = $xpath->query( './/th', $row );
+                    if ( $th && $th->length > 0 ) {
+                        $col_map = self::detect_columns( $th );
+                        continue; // first row is a header, skip it as data
+                    }
+                    // First row uses <td> for headers (common on older sites)
+                    $td = $xpath->query( './/td', $row );
+                    if ( $td && $td->length > 0 ) {
+                        $col_map = self::detect_columns( $td );
+                        // Skip if it looks like a header row (e.g. first cell is "Č." or "Jméno")
+                        $first_text = mb_strtolower( trim( $td->item( 0 )->textContent ) );
+                        if ( preg_match( '/^(č|číslo|jméno|hráč|#)/u', $first_text ) ) {
+                            continue;
+                        }
+                    }
+                }
+
+                if ( ! $col_map ) {
+                    continue;
+                }
+
+                $cells = $xpath->query( './/td', $row );
+                if ( ! $cells || $cells->length < 2 ) {
+                    continue;
+                }
+
+                $p = self::extract_from_row( $cells, $col_map );
+                if ( $p ) {
+                    $p['position'] = $entry['pos']; // override with section heading position
+                    $players[]     = $p;
+                }
+            }
+        }
+
+        return $players;
+    }
+
+    /**
+     * Strategy 2: scan all tables for one with detectable header columns and
+     * collect players from EVERY such table (not just the first one).
+     *
+     * @param DOMXPath $xpath
+     * @return array<int,array<string,string>>
+     */
+    private static function parse_all_tables_with_headers( DOMXPath $xpath ): array {
         $tables = $xpath->query( '//table' );
         if ( ! $tables ) {
             return [];
         }
+
+        $all_players = [];
 
         foreach ( $tables as $table ) {
             $header_row = $xpath->query( './/tr[1]', $table );
@@ -165,17 +268,16 @@ class HCJM_Player_Importer {
 
             $col_map = self::detect_columns( $headers );
 
-            // Need at least a name column
+            // Need at least a name column to treat this as a player table
             if ( ! isset( $col_map['name'] ) && ! isset( $col_map['firstname'] ) ) {
                 continue;
             }
 
-            $rows    = $xpath->query( './/tr', $table );
-            $players = [];
+            $rows = $xpath->query( './/tr', $table );
 
             foreach ( $rows as $i => $row ) {
                 if ( $i === 0 ) {
-                    continue; // skip header
+                    continue; // skip header row
                 }
                 $cells = $xpath->query( './/td', $row );
                 if ( ! $cells || $cells->length < 2 ) {
@@ -184,16 +286,31 @@ class HCJM_Player_Importer {
 
                 $p = self::extract_from_row( $cells, $col_map );
                 if ( $p ) {
-                    $players[] = $p;
+                    $all_players[] = $p;
                 }
-            }
-
-            if ( ! empty( $players ) ) {
-                return $players;
             }
         }
 
-        return [];
+        return $all_players;
+    }
+
+    /**
+     * Return the internal position key for a heading text, or '' if not a position heading.
+     *
+     * @param string $lower_text  Already lowercased heading text.
+     * @return string  brankár|obrance|utocnik|''
+     */
+    private static function position_from_heading( string $lower_text ): string {
+        if ( strpos( $lower_text, 'brank' ) !== false ) {
+            return 'brankár';
+        }
+        if ( strpos( $lower_text, 'obr' ) !== false ) {
+            return 'obrance';
+        }
+        if ( strpos( $lower_text, 'útočn' ) !== false || strpos( $lower_text, 'utocn' ) !== false ) {
+            return 'utocnik';
+        }
+        return '';
     }
 
     /**
