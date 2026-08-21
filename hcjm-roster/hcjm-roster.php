@@ -29,6 +29,7 @@ require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-activator.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-deactivator.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-database.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-teams.php';
+require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-opponents.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-players.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-staff.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-matches.php';
@@ -52,13 +53,15 @@ function hcjm_run(): void {
     $loader->add_action( 'plugins_loaded', null, 'hcjm_load_textdomain' );
 
     // CPT registration
-    $teams   = new HCJM_Teams();
-    $players = new HCJM_Players();
-    $staff   = new HCJM_Staff();
+    $teams     = new HCJM_Teams();
+    $players   = new HCJM_Players();
+    $staff     = new HCJM_Staff();
+    $opponents = new HCJM_Opponents();
 
-    $loader->add_action( 'init', $teams,   'register_post_type' );
-    $loader->add_action( 'init', $players, 'register_post_type' );
-    $loader->add_action( 'init', $staff,   'register_post_type' );
+    $loader->add_action( 'init', $teams,     'register_post_type' );
+    $loader->add_action( 'init', $players,   'register_post_type' );
+    $loader->add_action( 'init', $staff,     'register_post_type' );
+    $loader->add_action( 'init', $opponents, 'register_post_type' );
 
     // Shortcodes
     $shortcodes = new HCJM_Shortcodes();
@@ -83,7 +86,9 @@ function hcjm_run(): void {
         $loader->add_action( 'admin_post_hcjm_sync_matches',    $admin, 'handle_sync_matches' );
         $loader->add_action( 'admin_post_hcjm_import_players',  $admin, 'handle_import_players' );
         $loader->add_action( 'admin_post_hcjm_delete_match', $admin, 'handle_delete_match' );
-        $loader->add_action( 'admin_post_hcjm_save_match',  $admin, 'handle_save_match' );
+        $loader->add_action( 'admin_post_hcjm_save_match',       $admin, 'handle_save_match' );
+        $loader->add_action( 'admin_post_hcjm_save_opponent',    $admin, 'handle_save_opponent' );
+        $loader->add_action( 'admin_post_hcjm_populate_opponents',$admin, 'handle_populate_opponents' );
     }
 
     // Public assets

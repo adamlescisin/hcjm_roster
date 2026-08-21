@@ -26,6 +26,7 @@ class HCJM_Admin {
 
         add_submenu_page( 'hcjm-roster', __( 'Mužstva', HCJM_TEXT_DOMAIN ),      __( 'Mužstva', HCJM_TEXT_DOMAIN ),      'manage_options', 'hcjm-roster',         [ $this, 'page_teams' ] );
         add_submenu_page( 'hcjm-roster', __( 'Zápasy', HCJM_TEXT_DOMAIN ),       __( 'Zápasy', HCJM_TEXT_DOMAIN ),       'manage_options', 'hcjm-matches',        [ $this, 'page_matches' ] );
+        add_submenu_page( 'hcjm-roster', __( 'Soupeři', HCJM_TEXT_DOMAIN ),      __( 'Soupeři', HCJM_TEXT_DOMAIN ),      'manage_options', 'hcjm-opponents',      [ $this, 'page_opponents' ] );
         add_submenu_page( 'hcjm-roster', __( 'Nastavení', HCJM_TEXT_DOMAIN ),    __( 'Nastavení', HCJM_TEXT_DOMAIN ),    'manage_options', 'hcjm-settings',       [ $this, 'page_settings' ] );
     }
 
@@ -725,6 +726,127 @@ class HCJM_Admin {
     }
 
     // -------------------------------------------------------------------------
+    // Page: Opponents
+    // -------------------------------------------------------------------------
+
+    public function page_opponents(): void {
+        $section     = sanitize_key( $_GET['section'] ?? 'opponents' );
+        $opponent_id = isset( $_GET['opponent'] ) ? absint( $_GET['opponent'] ) : 0;
+
+        if ( $section === 'edit-opponent' ) {
+            $this->render_opponent_edit( $opponent_id );
+            return;
+        }
+
+        $opponents = HCJM_Opponents::get_all();
+        ?>
+        <div class="wrap hcjm-wrap">
+            <h1><?php esc_html_e( 'Soupeři', HCJM_TEXT_DOMAIN ); ?></h1>
+            <?php $this->show_notices(); ?>
+
+            <div class="hcjm-players-toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-opponents&section=edit-opponent' ) ); ?>" class="button button-primary">
+                    + <?php esc_html_e( 'Přidat soupeře', HCJM_TEXT_DOMAIN ); ?>
+                </a>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+                    <?php wp_nonce_field( 'hcjm_populate_opponents', 'hcjm_nonce' ); ?>
+                    <input type="hidden" name="action" value="hcjm_populate_opponents">
+                    <button type="submit" class="button button-secondary">
+                        &#8635; <?php esc_html_e( 'Doplnit ze zápasů', HCJM_TEXT_DOMAIN ); ?>
+                    </button>
+                </form>
+                <span class="description" style="line-height:30px">
+                    <?php esc_html_e( 'Přidá soupeře, kteří se vyskytují v importovaných zápasech a ještě nejsou v seznamu.', HCJM_TEXT_DOMAIN ); ?>
+                </span>
+            </div>
+
+            <table class="wp-list-table widefat fixed striped hcjm-table">
+                <thead>
+                    <tr>
+                        <th style="width:60px"><?php esc_html_e( 'Logo', HCJM_TEXT_DOMAIN ); ?></th>
+                        <th><?php esc_html_e( 'Název soupeře', HCJM_TEXT_DOMAIN ); ?></th>
+                        <th style="width:120px"><?php esc_html_e( 'Akce', HCJM_TEXT_DOMAIN ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php if ( empty( $opponents ) ) : ?>
+                    <tr><td colspan="3"><?php esc_html_e( 'Žádní soupeři. Klikni na „Doplnit ze zápasů" pro automatické přidání.', HCJM_TEXT_DOMAIN ); ?></td></tr>
+                <?php else : ?>
+                    <?php foreach ( $opponents as $opp ) :
+                        $logo_id  = HCJM_Opponents::get_logo_id( $opp->ID );
+                        $logo_url = $logo_id ? wp_get_attachment_image_url( $logo_id, 'thumbnail' ) : '';
+                    ?>
+                        <tr>
+                            <td>
+                                <?php if ( $logo_url ) : ?>
+                                    <img src="<?php echo esc_url( $logo_url ); ?>" style="width:40px;height:40px;object-fit:contain;border-radius:4px;border:1px solid #ddd">
+                                <?php else : ?>
+                                    <span style="display:inline-block;width:40px;height:40px;border:1px dashed #ccc;border-radius:4px;line-height:38px;text-align:center;color:#999;font-size:18px">?</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><strong><?php echo esc_html( $opp->post_title ); ?></strong></td>
+                            <td>
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-opponents&section=edit-opponent&opponent=' . $opp->ID ) ); ?>" class="button button-small">
+                                    <?php esc_html_e( 'Upravit', HCJM_TEXT_DOMAIN ); ?>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
+    private function render_opponent_edit( int $opponent_id ): void {
+        $opponent = $opponent_id ? HCJM_Opponents::get_by_id( $opponent_id ) : null;
+        $name     = $opponent ? $opponent->post_title : '';
+        $logo_id  = $opponent ? HCJM_Opponents::get_logo_id( $opponent_id ) : 0;
+        ?>
+        <div class="wrap hcjm-wrap">
+            <h1><?php echo $opponent_id ? esc_html__( 'Upravit soupeře', HCJM_TEXT_DOMAIN ) : esc_html__( 'Přidat soupeře', HCJM_TEXT_DOMAIN ); ?></h1>
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-opponents' ) ); ?>" class="hcjm-back">&larr; <?php esc_html_e( 'Zpět na soupeře', HCJM_TEXT_DOMAIN ); ?></a>
+            <?php $this->show_notices(); ?>
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <?php wp_nonce_field( 'hcjm_save_opponent_' . $opponent_id, 'hcjm_nonce' ); ?>
+                <input type="hidden" name="action"      value="hcjm_save_opponent">
+                <input type="hidden" name="opponent_id" value="<?php echo esc_attr( $opponent_id ); ?>">
+                <input type="hidden" name="logo_id"     id="hcjm_logo_id" value="<?php echo esc_attr( $logo_id ); ?>">
+
+                <table class="form-table">
+                    <tr>
+                        <th><?php esc_html_e( 'Název soupeře', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td><input type="text" name="name" class="regular-text" value="<?php echo esc_attr( $name ); ?>" required></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Logo', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <div id="hcjm_logo_preview" style="margin-bottom:8px">
+                                <?php if ( $logo_id ) : ?>
+                                    <img src="<?php echo esc_url( wp_get_attachment_image_url( $logo_id, 'thumbnail' ) ); ?>" style="width:80px;height:80px;object-fit:contain;border:1px solid #ddd;border-radius:6px">
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="button hcjm-upload-btn" data-target="hcjm_logo_id" data-preview="hcjm_logo_preview">
+                                <?php esc_html_e( 'Vybrat logo', HCJM_TEXT_DOMAIN ); ?>
+                            </button>
+                            <?php if ( $logo_id ) : ?>
+                                <button type="button" class="button hcjm-remove-photo" data-target="hcjm_logo_id" data-preview="hcjm_logo_preview">
+                                    <?php esc_html_e( 'Odebrat', HCJM_TEXT_DOMAIN ); ?>
+                                </button>
+                            <?php endif; ?>
+                            <p class="description"><?php esc_html_e( 'Vyberte logo z mediální knihovny.', HCJM_TEXT_DOMAIN ); ?></p>
+                        </td>
+                    </tr>
+                </table>
+
+                <?php submit_button( __( 'Uložit', HCJM_TEXT_DOMAIN ) ); ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    // -------------------------------------------------------------------------
     // Page: Settings
     // -------------------------------------------------------------------------
 
@@ -954,6 +1076,63 @@ class HCJM_Admin {
         $team_id = absint( $_POST['team_id'] ?? 0 );
         $season  = sanitize_text_field( $_POST['season'] ?? '' );
         wp_safe_redirect( $this->admin_url( [ 'section' => 'staff', 'team' => $team_id, 'season' => $season ], true ) . '&hcjm_notice=staff_deleted' );
+        exit;
+    }
+
+    public function handle_save_opponent(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
+        }
+        $opponent_id = absint( $_POST['opponent_id'] ?? 0 );
+        check_admin_referer( 'hcjm_save_opponent_' . $opponent_id, 'hcjm_nonce' );
+
+        $name    = sanitize_text_field( $_POST['name'] ?? '' );
+        $logo_id = absint( $_POST['logo_id'] ?? 0 );
+
+        if ( ! $name ) {
+            wp_safe_redirect( admin_url( 'admin.php?page=hcjm-opponents' ) . '&hcjm_notice=error' );
+            exit;
+        }
+
+        if ( $opponent_id ) {
+            wp_update_post( [
+                'ID'         => $opponent_id,
+                'post_title' => $name,
+                'post_name'  => sanitize_title( $name ),
+            ] );
+        } else {
+            $opponent_id = wp_insert_post( [
+                'post_type'   => 'hcjm_opponent',
+                'post_title'  => $name,
+                'post_status' => 'publish',
+                'post_name'   => sanitize_title( $name ),
+            ] );
+        }
+
+        if ( ! $opponent_id || is_wp_error( $opponent_id ) ) {
+            wp_safe_redirect( admin_url( 'admin.php?page=hcjm-opponents' ) . '&hcjm_notice=error' );
+            exit;
+        }
+
+        if ( $logo_id ) {
+            update_post_meta( (int) $opponent_id, '_hcjm_opponent_logo_id', $logo_id );
+        } else {
+            delete_post_meta( (int) $opponent_id, '_hcjm_opponent_logo_id' );
+        }
+
+        wp_safe_redirect( admin_url( 'admin.php?page=hcjm-opponents' ) . '&hcjm_notice=opponent_saved' );
+        exit;
+    }
+
+    public function handle_populate_opponents(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
+        }
+        check_admin_referer( 'hcjm_populate_opponents', 'hcjm_nonce' );
+
+        $added = HCJM_Opponents::populate_from_matches();
+
+        wp_safe_redirect( admin_url( 'admin.php?page=hcjm-opponents' ) . '&hcjm_notice=opponents_populated&added=' . $added );
         exit;
     }
 
@@ -1210,6 +1389,11 @@ class HCJM_Admin {
             'player_deleted'=> [ 'success', __( 'Hráč byl smazán.', HCJM_TEXT_DOMAIN ) ],
             'staff_saved'   => [ 'success', __( 'Člen realizačního týmu byl uložen.', HCJM_TEXT_DOMAIN ) ],
             'staff_deleted' => [ 'success', __( 'Člen byl smazán.', HCJM_TEXT_DOMAIN ) ],
+            'opponent_saved'     => [ 'success', __( 'Soupeř byl uložen.', HCJM_TEXT_DOMAIN ) ],
+            'opponents_populated'=> [ 'success', sprintf(
+                __( 'Doplnění dokončeno. Přidáno %d nových soupeřů.', HCJM_TEXT_DOMAIN ),
+                absint( $_GET['added'] ?? 0 )
+            ) ],
             'match_saved'   => [ 'success', __( 'Zápas byl uložen.', HCJM_TEXT_DOMAIN ) ],
             'match_deleted' => [ 'success', __( 'Zápas byl smazán.', HCJM_TEXT_DOMAIN ) ],
             'sync_done'     => [ $imported > 0 ? 'success' : 'warning', sprintf(
