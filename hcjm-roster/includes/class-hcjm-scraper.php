@@ -49,10 +49,11 @@ class HCJM_Scraper {
             // ------------------------------------------------------------------
             $list_url = add_query_arg(
                 [
-                    'filter[season]'    => $season_year,
-                    'filter[team]'      => $external_id,
-                    'filter[league]'    => $league_id ?: '',
-                    'filter[direction]' => 'ASC',
+                    'filter[season]'       => $season_year,
+                    'filter[team]'         => $external_id,
+                    'filter[league]'       => $league_id ?: '',
+                    'filter[direction]'    => 'ASC',
+                    'filter[timeShortcut]' => 'this-season',
                 ],
                 'https://zapasy.ceskyhokej.cz/seznam-zapasu'
             );
