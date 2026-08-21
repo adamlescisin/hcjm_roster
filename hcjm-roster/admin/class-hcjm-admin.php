@@ -1018,7 +1018,7 @@ class HCJM_Admin {
             ? admin_url( 'admin.php' )
             : '?';
         $params = array_merge( [ 'page' => 'hcjm-roster' ], $extra );
-        return $base . ( $absolute ? '&' : '' ) . http_build_query( $params );
+        return $base . ( $absolute ? '?' : '' ) . http_build_query( $params );
     }
 
     private function show_notices(): void {
