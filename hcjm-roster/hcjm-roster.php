@@ -83,6 +83,7 @@ function hcjm_run(): void {
         $loader->add_action( 'admin_post_hcjm_sync_matches',    $admin, 'handle_sync_matches' );
         $loader->add_action( 'admin_post_hcjm_import_players',  $admin, 'handle_import_players' );
         $loader->add_action( 'admin_post_hcjm_delete_match', $admin, 'handle_delete_match' );
+        $loader->add_action( 'admin_post_hcjm_save_match',  $admin, 'handle_save_match' );
     }
 
     // Public assets

@@ -602,8 +602,16 @@ class HCJM_Admin {
         $teams          = HCJM_Teams::get_all();
         $current_season = HCJM_Matches::current_season();
         $season         = isset( $_GET['season'] ) ? sanitize_text_field( $_GET['season'] ) : $current_season;
-        $filter_team    = isset( $_GET['filter_team'] ) ? absint( $_GET['filter_team'] ) : 0;
         $seasons        = HCJM_Matches::season_list();
+        $section        = sanitize_key( $_GET['section'] ?? 'matches' );
+
+        if ( $section === 'edit-match' ) {
+            $match_id = isset( $_GET['match'] ) ? absint( $_GET['match'] ) : 0;
+            $this->render_match_edit( $match_id, $season );
+            return;
+        }
+
+        $filter_team    = isset( $_GET['filter_team'] ) ? absint( $_GET['filter_team'] ) : 0;
 
         $args    = [ 'season' => $season, 'limit' => 200 ];
         if ( $filter_team ) {
@@ -637,11 +645,15 @@ class HCJM_Admin {
                     </label>
                 </form>
 
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-matches&section=edit-match&season=' . urlencode( $season ) ) ); ?>" class="button button-primary">
+                    + <?php esc_html_e( 'Přidat zápas', HCJM_TEXT_DOMAIN ); ?>
+                </a>
+
                 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
                     <?php wp_nonce_field( 'hcjm_sync_matches', 'hcjm_nonce' ); ?>
                     <input type="hidden" name="action" value="hcjm_sync_matches">
                     <input type="hidden" name="season" value="<?php echo esc_attr( $season ); ?>">
-                    <button type="submit" class="button button-primary">&#8635; <?php esc_html_e( 'Synchronizovat ze ceskyhokej.cz', HCJM_TEXT_DOMAIN ); ?></button>
+                    <button type="submit" class="button button-secondary">&#8635; <?php esc_html_e( 'Synchronizovat ze ceskyhokej.cz', HCJM_TEXT_DOMAIN ); ?></button>
                 </form>
             </div>
 
@@ -694,6 +706,7 @@ class HCJM_Admin {
                                 <?php endif; ?>
                             </td>
                             <td>
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-matches&section=edit-match&match=' . $match->id . '&season=' . urlencode( $season ) ) ); ?>" class="button button-small"><?php esc_html_e( 'Upravit', HCJM_TEXT_DOMAIN ); ?></a>
                                 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline" onsubmit="return confirm('<?php esc_attr_e( 'Smazat zápas?', HCJM_TEXT_DOMAIN ); ?>')">
                                     <?php wp_nonce_field( 'hcjm_delete_match_' . $match->id, 'hcjm_nonce' ); ?>
                                     <input type="hidden" name="action"   value="hcjm_delete_match">
@@ -1007,6 +1020,164 @@ class HCJM_Admin {
         exit;
     }
 
+    public function handle_save_match(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
+        }
+        $match_id = absint( $_POST['match_id'] ?? 0 );
+        check_admin_referer( 'hcjm_save_match_' . $match_id, 'hcjm_nonce' );
+
+        $team_id    = absint( $_POST['team_id'] ?? 0 );
+        $season     = sanitize_text_field( $_POST['season'] ?? HCJM_Matches::current_season() );
+        $date_part  = sanitize_text_field( $_POST['match_date_date'] ?? '' );
+        $time_part  = sanitize_text_field( $_POST['match_date_time'] ?? '' );
+        $is_home    = absint( $_POST['is_home'] ?? 1 );
+        $opponent   = sanitize_text_field( $_POST['opponent'] ?? '' );
+        $status     = in_array( $_POST['status'] ?? '', [ 'planned', 'played' ], true ) ? $_POST['status'] : 'planned';
+
+        $score_home_raw = $_POST['score_home'] ?? '';
+        $score_away_raw = $_POST['score_away'] ?? '';
+        $score_home     = ( $status === 'played' && $score_home_raw !== '' ) ? absint( $score_home_raw ) : null;
+        $score_away     = ( $status === 'played' && $score_away_raw !== '' ) ? absint( $score_away_raw ) : null;
+
+        $match_date = $date_part ? $date_part . ' ' . ( $time_part ? $time_part . ':00' : '00:00:00' ) : '';
+
+        // Use existing external_id for updates; generate a new one for new manual entries.
+        $external_id = sanitize_text_field( $_POST['external_id'] ?? '' );
+        if ( ! $external_id ) {
+            $external_id = 'manual_' . wp_generate_password( 12, false, false );
+        }
+
+        HCJM_Database::upsert_match( [
+            'team_id'     => $team_id,
+            'season'      => $season,
+            'match_date'  => $match_date,
+            'is_home'     => $is_home,
+            'opponent'    => $opponent,
+            'status'      => $status,
+            'score_home'  => $score_home,
+            'score_away'  => $score_away,
+            'external_id' => $external_id,
+        ] );
+
+        wp_safe_redirect( admin_url( 'admin.php?page=hcjm-matches&season=' . urlencode( $season ) ) . '&hcjm_notice=match_saved' );
+        exit;
+    }
+
+    // -------------------------------------------------------------------------
+    // Match edit form
+    // -------------------------------------------------------------------------
+
+    private function render_match_edit( int $match_id, string $season ): void {
+        $teams   = HCJM_Teams::get_all();
+        $seasons = HCJM_Matches::season_list();
+
+        $match = $match_id ? HCJM_Database::get_match( $match_id ) : null;
+
+        $team_id_val    = $match ? (int) $match->team_id    : ( $teams ? $teams[0]->ID : 0 );
+        $season_val     = $match ? $match->season            : $season;
+        $is_home_val    = $match ? (int) $match->is_home     : 1;
+        $opponent_val   = $match ? $match->opponent          : '';
+        $status_val     = $match ? $match->status            : 'planned';
+        $score_home_val = $match ? $match->score_home        : '';
+        $score_away_val = $match ? $match->score_away        : '';
+        $external_id    = $match ? $match->external_id       : '';
+
+        $date_part = '';
+        $time_part = '';
+        if ( $match && $match->match_date && $match->match_date !== '0000-00-00 00:00:00' ) {
+            $date_part = substr( $match->match_date, 0, 10 );
+            $time_part = substr( $match->match_date, 11, 5 );
+        }
+        ?>
+        <div class="wrap hcjm-wrap">
+            <h1><?php echo $match_id ? esc_html__( 'Upravit zápas', HCJM_TEXT_DOMAIN ) : esc_html__( 'Přidat zápas', HCJM_TEXT_DOMAIN ); ?></h1>
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-matches&season=' . urlencode( $season ) ) ); ?>" class="hcjm-back">&larr; <?php esc_html_e( 'Zpět na zápasy', HCJM_TEXT_DOMAIN ); ?></a>
+            <?php $this->show_notices(); ?>
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <?php wp_nonce_field( 'hcjm_save_match_' . $match_id, 'hcjm_nonce' ); ?>
+                <input type="hidden" name="action"      value="hcjm_save_match">
+                <input type="hidden" name="match_id"    value="<?php echo esc_attr( $match_id ); ?>">
+                <input type="hidden" name="external_id" value="<?php echo esc_attr( $external_id ); ?>">
+
+                <table class="form-table">
+                    <tr>
+                        <th><?php esc_html_e( 'Mužstvo', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <select name="team_id" required>
+                                <?php foreach ( $teams as $t ) : ?>
+                                    <option value="<?php echo esc_attr( $t->ID ); ?>" <?php selected( $t->ID, $team_id_val ); ?>><?php echo esc_html( $t->post_title ); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Sezóna', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <select name="season">
+                                <?php foreach ( $seasons as $s ) : ?>
+                                    <option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $season_val ); ?>><?php echo esc_html( $s ); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Datum', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td><input type="date" name="match_date_date" class="regular-text" value="<?php echo esc_attr( $date_part ); ?>" required></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Začátek', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td><input type="time" name="match_date_time" class="regular-text" value="<?php echo esc_attr( $time_part ); ?>"></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Domácí / Venku', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <label><input type="radio" name="is_home" value="1" <?php checked( $is_home_val, 1 ); ?>> <?php esc_html_e( 'Domácí (D)', HCJM_TEXT_DOMAIN ); ?></label>
+                            &nbsp;&nbsp;
+                            <label><input type="radio" name="is_home" value="0" <?php checked( $is_home_val, 0 ); ?>> <?php esc_html_e( 'Venku (V)', HCJM_TEXT_DOMAIN ); ?></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Soupeř', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td><input type="text" name="opponent" class="regular-text" value="<?php echo esc_attr( $opponent_val ); ?>" required></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Status', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <label><input type="radio" name="status" value="planned" id="hcjm_status_planned" <?php checked( $status_val, 'planned' ); ?>> <?php esc_html_e( 'Plánováno', HCJM_TEXT_DOMAIN ); ?></label>
+                            &nbsp;&nbsp;
+                            <label><input type="radio" name="status" value="played"  id="hcjm_status_played"  <?php checked( $status_val, 'played' ); ?>> <?php esc_html_e( 'Odehráno', HCJM_TEXT_DOMAIN ); ?></label>
+                        </td>
+                    </tr>
+                    <tr id="hcjm_score_row" style="<?php echo $status_val !== 'played' ? 'display:none' : ''; ?>">
+                        <th><?php esc_html_e( 'Výsledek', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <input type="number" name="score_home" class="small-text" min="0" max="99" value="<?php echo esc_attr( $score_home_val ); ?>" placeholder="0">
+                            &nbsp;:&nbsp;
+                            <input type="number" name="score_away" class="small-text" min="0" max="99" value="<?php echo esc_attr( $score_away_val ); ?>" placeholder="0">
+                            <p class="description"><?php esc_html_e( 'Naše skóre : skóre soupeře', HCJM_TEXT_DOMAIN ); ?></p>
+                        </td>
+                    </tr>
+                </table>
+
+                <script>
+                (function(){
+                    var radios = document.querySelectorAll('input[name="status"]');
+                    var row    = document.getElementById('hcjm_score_row');
+                    radios.forEach(function(r){
+                        r.addEventListener('change', function(){
+                            row.style.display = (this.value === 'played') ? '' : 'none';
+                        });
+                    });
+                })();
+                </script>
+
+                <?php submit_button( $match_id ? __( 'Uložit zápas', HCJM_TEXT_DOMAIN ) : __( 'Přidat zápas', HCJM_TEXT_DOMAIN ) ); ?>
+            </form>
+        </div>
+        <?php
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
@@ -1039,6 +1210,7 @@ class HCJM_Admin {
             'player_deleted'=> [ 'success', __( 'Hráč byl smazán.', HCJM_TEXT_DOMAIN ) ],
             'staff_saved'   => [ 'success', __( 'Člen realizačního týmu byl uložen.', HCJM_TEXT_DOMAIN ) ],
             'staff_deleted' => [ 'success', __( 'Člen byl smazán.', HCJM_TEXT_DOMAIN ) ],
+            'match_saved'   => [ 'success', __( 'Zápas byl uložen.', HCJM_TEXT_DOMAIN ) ],
             'match_deleted' => [ 'success', __( 'Zápas byl smazán.', HCJM_TEXT_DOMAIN ) ],
             'sync_done'     => [ $imported > 0 ? 'success' : 'warning', sprintf(
                 __( 'Synchronizace dokončena. Importováno %d zápasů.', HCJM_TEXT_DOMAIN ), $imported
