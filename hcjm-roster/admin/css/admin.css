@@ -1,0 +1,31 @@
+/* HCJM Roster — Admin Styles */
+
+.hcjm-wrap { max-width: 1200px; }
+.hcjm-wrap h1 { margin-bottom: 16px; }
+
+.hcjm-back {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #555;
+    text-decoration: none;
+}
+.hcjm-back:hover { color: #0073aa; }
+
+.hcjm-table img.hcjm-thumb     { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
+.hcjm-table img.hcjm-thumb-lg  { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; }
+
+.hcjm-add-btn { margin-bottom: 0; }
+.hcjm-season-filter { margin: 12px 0; }
+.hcjm-matches-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+
+.hcjm-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+.hcjm-badge-home    { background: #dbeafe; color: #1e40af; }
+.hcjm-badge-away    { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.hcjm-badge-played  { background: #dcfce7; color: #166534; }
+.hcjm-badge-planned { background: #fef3c7; color: #92400e; }
