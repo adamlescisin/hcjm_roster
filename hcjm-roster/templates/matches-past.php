@@ -46,7 +46,17 @@ $days_cs = [
                         <span class="hcjm-match-badge <?php echo $match->is_home ? 'hcjm-home' : 'hcjm-away'; ?>">
                             <?php echo $match->is_home ? esc_html__( 'D', HCJM_TEXT_DOMAIN ) : esc_html__( 'V', HCJM_TEXT_DOMAIN ); ?>
                         </span>
-                        <span class="hcjm-match-opponent"><?php echo esc_html( $match->opponent ); ?></span>
+                        <span class="hcjm-match-matchup">
+                            <?php if ( $match->is_home ) : ?>
+                                <span class="hcjm-match-team hcjm-match-team-us"><?php echo $team_name; ?></span>
+                                <span class="hcjm-match-vs">vs.</span>
+                                <span class="hcjm-match-team hcjm-match-team-opponent"><?php echo esc_html( $match->opponent ); ?></span>
+                            <?php else : ?>
+                                <span class="hcjm-match-team hcjm-match-team-opponent"><?php echo esc_html( $match->opponent ); ?></span>
+                                <span class="hcjm-match-vs">vs.</span>
+                                <span class="hcjm-match-team hcjm-match-team-us"><?php echo $team_name; ?></span>
+                            <?php endif; ?>
+                        </span>
                     </div>
                     <div class="hcjm-match-score">
                         <strong class="hcjm-score"><?php echo $score; ?></strong>

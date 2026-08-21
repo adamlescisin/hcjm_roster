@@ -529,6 +529,27 @@
   white-space: nowrap;
 }
 
+.hcjm-match-matchup {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.hcjm-match-team {
+  font-weight: var(--font-weight-semibold);
+  font-size: 0.92rem;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hcjm-match-vs {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
 /* Score / status column */
 .hcjm-match-score {
   display: flex;
