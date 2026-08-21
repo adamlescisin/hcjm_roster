@@ -27,6 +27,7 @@ class HCJM_Admin {
         add_submenu_page( 'hcjm-roster', __( 'Mužstva', HCJM_TEXT_DOMAIN ),      __( 'Mužstva', HCJM_TEXT_DOMAIN ),      'manage_options', 'hcjm-roster',         [ $this, 'page_teams' ] );
         add_submenu_page( 'hcjm-roster', __( 'Zápasy', HCJM_TEXT_DOMAIN ),       __( 'Zápasy', HCJM_TEXT_DOMAIN ),       'manage_options', 'hcjm-matches',        [ $this, 'page_matches' ] );
         add_submenu_page( 'hcjm-roster', __( 'Soupeři', HCJM_TEXT_DOMAIN ),      __( 'Soupeři', HCJM_TEXT_DOMAIN ),      'manage_options', 'hcjm-opponents',      [ $this, 'page_opponents' ] );
+        add_submenu_page( 'hcjm-roster', __( 'Vzhled', HCJM_TEXT_DOMAIN ),       __( 'Vzhled', HCJM_TEXT_DOMAIN ),       'manage_options', 'hcjm-styles',         [ $this, 'page_styles' ] );
         add_submenu_page( 'hcjm-roster', __( 'Nastavení', HCJM_TEXT_DOMAIN ),    __( 'Nastavení', HCJM_TEXT_DOMAIN ),    'manage_options', 'hcjm-settings',       [ $this, 'page_settings' ] );
     }
 
@@ -41,6 +42,11 @@ class HCJM_Admin {
         wp_enqueue_style( 'hcjm-admin', HCJM_PLUGIN_URL . 'admin/css/admin.css', [], HCJM_VERSION );
         wp_enqueue_script( 'hcjm-admin', HCJM_PLUGIN_URL . 'admin/js/admin.js', [ 'jquery' ], HCJM_VERSION, true );
         wp_enqueue_media();
+
+        if ( strpos( $hook, 'hcjm-styles' ) !== false ) {
+            wp_enqueue_style( 'wp-color-picker' );
+            wp_enqueue_script( 'wp-color-picker' );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -847,6 +853,148 @@ class HCJM_Admin {
     }
 
     // -------------------------------------------------------------------------
+    // Page: Styles (appearance customisation)
+    // -------------------------------------------------------------------------
+
+    public function page_styles(): void {
+        $schema  = HCJM_Styles::schema();
+        $saved   = HCJM_Styles::get_saved();
+        $fonts   = HCJM_Styles::font_options();
+        $preview = HCJM_Styles::generate_css( $saved );
+
+        // Group labels for the tab-style navigation
+        $group_ids = array_keys( $schema );
+        $active_group = sanitize_key( $_GET['style_group'] ?? $group_ids[0] );
+        if ( ! isset( $schema[ $active_group ] ) ) {
+            $active_group = $group_ids[0];
+        }
+        ?>
+        <div class="wrap hcjm-wrap">
+            <h1><?php esc_html_e( 'Vzhled — úprava stylů', HCJM_TEXT_DOMAIN ); ?></h1>
+            <?php $this->show_notices(); ?>
+
+            <style>
+            .hcjm-style-tabs { display:flex; gap:0; border-bottom:1px solid #c3c4c7; margin-bottom:24px; flex-wrap:wrap; }
+            .hcjm-style-tab  { padding:8px 18px; font-size:13px; font-weight:500; color:#50575e; text-decoration:none; border:1px solid transparent; border-bottom:none; border-radius:3px 3px 0 0; margin-bottom:-1px; background:#f0f0f1; }
+            .hcjm-style-tab:hover { color:#135e96; background:#fff; }
+            .hcjm-style-tab.active { background:#fff; border-color:#c3c4c7; color:#1d2327; }
+            .hcjm-style-field { display:grid; grid-template-columns:220px 1fr; gap:12px 24px; align-items:start; padding:14px 0; border-bottom:1px solid #f0f0f1; }
+            .hcjm-style-field:last-child { border-bottom:none; }
+            .hcjm-style-field label { font-weight:600; font-size:13px; padding-top:6px; }
+            .hcjm-style-desc { font-size:12px; color:#646970; margin-top:4px; }
+            .hcjm-range-wrap { display:flex; align-items:center; gap:10px; }
+            .hcjm-range-wrap input[type=range] { width:200px; }
+            .hcjm-range-val { font-weight:600; font-size:13px; min-width:48px; }
+            .hcjm-style-preview-block { background:#f6f7f7; border:1px solid #c3c4c7; border-radius:4px; padding:14px 16px; margin-top:24px; }
+            .hcjm-style-preview-block h3 { margin:0 0 8px; font-size:13px; color:#50575e; }
+            .hcjm-style-preview-block code { display:block; font-size:11px; line-height:1.7; white-space:pre; overflow-x:auto; max-height:280px; background:transparent; border:none; padding:0; }
+            .hcjm-color-swatch { display:inline-block; width:14px; height:14px; border-radius:3px; border:1px solid #ccc; vertical-align:middle; margin-right:4px; }
+            </style>
+
+            <?php /* Group tabs */ ?>
+            <div class="hcjm-style-tabs">
+                <?php foreach ( $schema as $gk => $group ) : ?>
+                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=hcjm-styles&style_group=' . $gk ) ); ?>"
+                       class="hcjm-style-tab <?php echo $gk === $active_group ? 'active' : ''; ?>">
+                        <?php echo esc_html( $group['label'] ); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <?php wp_nonce_field( 'hcjm_save_styles', 'hcjm_nonce' ); ?>
+                <input type="hidden" name="action"       value="hcjm_save_styles">
+                <input type="hidden" name="style_group"  value="<?php echo esc_attr( $active_group ); ?>">
+
+                <?php foreach ( $schema[ $active_group ]['fields'] as $key => $field ) :
+                    $value = $saved[ $key ] ?? $field['default'];
+                ?>
+                <div class="hcjm-style-field">
+                    <div>
+                        <label for="hcjm_style_<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ); ?></label>
+                        <?php if ( ! empty( $field['desc'] ) ) : ?>
+                            <p class="hcjm-style-desc"><?php echo esc_html( $field['desc'] ); ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                    <?php if ( $field['type'] === 'color' ) : ?>
+                        <input type="text"
+                               id="hcjm_style_<?php echo esc_attr( $key ); ?>"
+                               name="hcjm_styles[<?php echo esc_attr( $key ); ?>]"
+                               value="<?php echo esc_attr( $value ); ?>"
+                               class="hcjm-color-picker"
+                               data-default-color="<?php echo esc_attr( $field['default'] ); ?>">
+
+                    <?php elseif ( $field['type'] === 'range' ) : ?>
+                        <div class="hcjm-range-wrap">
+                            <input type="range"
+                                   id="hcjm_style_<?php echo esc_attr( $key ); ?>"
+                                   name="hcjm_styles[<?php echo esc_attr( $key ); ?>]"
+                                   value="<?php echo esc_attr( $value ); ?>"
+                                   min="<?php echo esc_attr( $field['min'] ); ?>"
+                                   max="<?php echo esc_attr( $field['max'] ); ?>"
+                                   oninput="document.getElementById('hcjm_rv_<?php echo esc_attr( $key ); ?>').textContent = this.value + '<?php echo esc_js( $field['unit'] ?? '' ); ?>'">
+                            <span id="hcjm_rv_<?php echo esc_attr( $key ); ?>" class="hcjm-range-val"><?php echo esc_html( $value . ( $field['unit'] ?? '' ) ); ?></span>
+                            <button type="button" class="button button-small"
+                                onclick="var el=document.getElementById('hcjm_style_<?php echo esc_attr( $key ); ?>');el.value=<?php echo (int) $field['default']; ?>;document.getElementById('hcjm_rv_<?php echo esc_attr( $key ); ?>').textContent=<?php echo (int) $field['default']; ?>+'<?php echo esc_js( $field['unit'] ?? '' ); ?>'">
+                                <?php esc_html_e( 'Reset', HCJM_TEXT_DOMAIN ); ?>
+                            </button>
+                        </div>
+
+                    <?php elseif ( $field['type'] === 'font' ) : ?>
+                        <select id="hcjm_style_<?php echo esc_attr( $key ); ?>"
+                                name="hcjm_styles[<?php echo esc_attr( $key ); ?>]">
+                            <?php foreach ( $fonts as $fk => $font ) : ?>
+                                <option value="<?php echo esc_attr( $fk ); ?>"
+                                    <?php selected( $fk, $value ); ?>
+                                    style="font-family:<?php echo esc_attr( $font['stack'] ?: 'inherit' ); ?>">
+                                    <?php echo esc_html( $font['label'] ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                    <?php elseif ( $field['type'] === 'textarea' ) : ?>
+                        <textarea id="hcjm_style_<?php echo esc_attr( $key ); ?>"
+                                  name="hcjm_styles[<?php echo esc_attr( $key ); ?>]"
+                                  rows="12"
+                                  class="large-text code"
+                                  spellcheck="false"><?php echo esc_textarea( (string) $value ); ?></textarea>
+
+                    <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+
+                <p style="margin-top:20px">
+                    <?php submit_button( __( 'Uložit skupinu', HCJM_TEXT_DOMAIN ), 'primary', 'submit', false ); ?>
+                </p>
+            </form>
+
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+                  onsubmit="return confirm('<?php esc_attr_e( 'Resetovat celou skupinu na výchozí hodnoty?', HCJM_TEXT_DOMAIN ); ?>')">
+                <?php wp_nonce_field( 'hcjm_reset_styles_group', 'hcjm_nonce' ); ?>
+                <input type="hidden" name="action"      value="hcjm_reset_styles_group">
+                <input type="hidden" name="style_group" value="<?php echo esc_attr( $active_group ); ?>">
+                <button type="submit" class="button"><?php esc_html_e( 'Resetovat skupinu', HCJM_TEXT_DOMAIN ); ?></button>
+            </form>
+
+            <?php if ( $preview ) : ?>
+            <div class="hcjm-style-preview-block">
+                <h3><?php esc_html_e( 'Generované CSS (náhled)', HCJM_TEXT_DOMAIN ); ?></h3>
+                <code><?php echo esc_html( $preview ); ?></code>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <script>
+        jQuery(function($){
+            $('.hcjm-color-picker').wpColorPicker();
+        });
+        </script>
+        <?php
+    }
+
+    // -------------------------------------------------------------------------
     // Page: Settings
     // -------------------------------------------------------------------------
 
@@ -1394,6 +1542,8 @@ class HCJM_Admin {
                 __( 'Doplnění dokončeno. Přidáno %d nových soupeřů.', HCJM_TEXT_DOMAIN ),
                 absint( $_GET['added'] ?? 0 )
             ) ],
+            'styles_saved'  => [ 'success', __( 'Styly byly uloženy.', HCJM_TEXT_DOMAIN ) ],
+            'styles_reset'  => [ 'success', __( 'Skupina stylů byla resetována na výchozí hodnoty.', HCJM_TEXT_DOMAIN ) ],
             'match_saved'   => [ 'success', __( 'Zápas byl uložen.', HCJM_TEXT_DOMAIN ) ],
             'match_deleted' => [ 'success', __( 'Zápas byl smazán.', HCJM_TEXT_DOMAIN ) ],
             'sync_done'     => [ $imported > 0 ? 'success' : 'warning', sprintf(
@@ -1470,5 +1620,85 @@ class HCJM_Admin {
 
             echo '</div>';
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Handler: save styles group
+    // -------------------------------------------------------------------------
+
+    public function handle_save_styles(): void {
+        check_admin_referer( 'hcjm_save_styles', 'hcjm_nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
+        }
+
+        $schema      = HCJM_Styles::schema();
+        $fonts       = HCJM_Styles::font_options();
+        $group_key   = sanitize_key( $_POST['style_group'] ?? '' );
+        $raw_input   = isset( $_POST['hcjm_styles'] ) && is_array( $_POST['hcjm_styles'] ) ? $_POST['hcjm_styles'] : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+        // Load existing saved values so we only update the current group's fields
+        $saved = get_option( HCJM_Styles::OPTION_KEY, [] );
+        if ( ! is_array( $saved ) ) {
+            $saved = [];
+        }
+
+        $group_fields = $schema[ $group_key ]['fields'] ?? [];
+        foreach ( $group_fields as $key => $field ) {
+            $raw = $raw_input[ $key ] ?? '';
+            switch ( $field['type'] ) {
+                case 'color':
+                    $val = sanitize_hex_color( (string) $raw );
+                    if ( $val ) {
+                        $saved[ $key ] = $val;
+                    }
+                    break;
+                case 'range':
+                    $saved[ $key ] = (string) max( (int) $field['min'], min( (int) $field['max'], (int) $raw ) );
+                    break;
+                case 'font':
+                    $saved[ $key ] = isset( $fonts[ (string) $raw ] ) ? (string) $raw : $field['default'];
+                    break;
+                case 'textarea':
+                    $saved[ $key ] = wp_strip_all_tags( (string) $raw );
+                    break;
+            }
+        }
+
+        update_option( HCJM_Styles::OPTION_KEY, $saved );
+
+        wp_safe_redirect( admin_url( 'admin.php?page=hcjm-styles&style_group=' . urlencode( $group_key ) . '&hcjm_notice=styles_saved' ) );
+        exit;
+    }
+
+    // -------------------------------------------------------------------------
+    // Handler: reset one styles group to defaults
+    // -------------------------------------------------------------------------
+
+    public function handle_reset_styles_group(): void {
+        check_admin_referer( 'hcjm_reset_styles_group', 'hcjm_nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Nedostatečná oprávnění.', HCJM_TEXT_DOMAIN ) );
+        }
+
+        $schema    = HCJM_Styles::schema();
+        $group_key = sanitize_key( $_POST['style_group'] ?? '' );
+
+        $saved = get_option( HCJM_Styles::OPTION_KEY, [] );
+        if ( ! is_array( $saved ) ) {
+            $saved = [];
+        }
+
+        $group_fields = $schema[ $group_key ]['fields'] ?? [];
+        foreach ( array_keys( $group_fields ) as $key ) {
+            unset( $saved[ $key ] );
+        }
+
+        update_option( HCJM_Styles::OPTION_KEY, $saved );
+
+        wp_safe_redirect( admin_url( 'admin.php?page=hcjm-styles&style_group=' . urlencode( $group_key ) . '&hcjm_notice=styles_reset' ) );
+        exit;
     }
 }

@@ -36,6 +36,7 @@ require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-matches.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-scraper.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-player-importer.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-cron.php';
+require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-styles.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-shortcodes.php';
 require_once HCJM_PLUGIN_DIR . 'admin/class-hcjm-admin.php';
 require_once HCJM_PLUGIN_DIR . 'public/class-hcjm-public.php';
@@ -89,6 +90,8 @@ function hcjm_run(): void {
         $loader->add_action( 'admin_post_hcjm_save_match',       $admin, 'handle_save_match' );
         $loader->add_action( 'admin_post_hcjm_save_opponent',    $admin, 'handle_save_opponent' );
         $loader->add_action( 'admin_post_hcjm_populate_opponents',$admin, 'handle_populate_opponents' );
+        $loader->add_action( 'admin_post_hcjm_save_styles',        $admin, 'handle_save_styles' );
+        $loader->add_action( 'admin_post_hcjm_reset_styles_group', $admin, 'handle_reset_styles_group' );
     }
 
     // Public assets

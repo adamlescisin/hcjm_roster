@@ -26,6 +26,18 @@ class HCJM_Public {
             HCJM_VERSION,
             true
         );
+
+        $styles  = HCJM_Styles::get_saved();
+        $css     = HCJM_Styles::generate_css( $styles );
+        if ( $css ) {
+            wp_add_inline_style( 'hcjm-public', $css );
+        }
+
+        $font_key = $styles['font_family'] ?? '';
+        $font_url = $font_key ? HCJM_Styles::get_font_url( $font_key ) : '';
+        if ( $font_url ) {
+            wp_enqueue_style( 'hcjm-gfont', $font_url, [ 'hcjm-public' ], null );
+        }
     }
 
     /**
