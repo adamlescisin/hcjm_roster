@@ -960,6 +960,9 @@ class HCJM_Admin {
             'details'  => $results,
         ] );
 
+        // Store per-team details for the notice
+        set_transient( 'hcjm_sync_result_' . get_current_user_id(), $results, 120 );
+
         wp_safe_redirect( admin_url( 'admin.php?page=hcjm-matches&season=' . urlencode( $season ) ) . '&hcjm_notice=sync_done&imported=' . $total );
         exit;
     }
@@ -1027,36 +1030,89 @@ class HCJM_Admin {
             return;
         }
 
+        $imported = absint( $_GET['imported'] ?? 0 );
+        $skipped  = absint( $_GET['skipped']  ?? 0 );
+
         $messages = [
-            'team_saved'    => __( 'Mužstvo bylo uloženo.', HCJM_TEXT_DOMAIN ),
-            'player_saved'  => __( 'Hráč byl uložen.', HCJM_TEXT_DOMAIN ),
-            'player_deleted'=> __( 'Hráč byl smazán.', HCJM_TEXT_DOMAIN ),
-            'staff_saved'   => __( 'Člen realizačního týmu byl uložen.', HCJM_TEXT_DOMAIN ),
-            'staff_deleted' => __( 'Člen byl smazán.', HCJM_TEXT_DOMAIN ),
-            'match_deleted' => __( 'Zápas byl smazán.', HCJM_TEXT_DOMAIN ),
-            'sync_done'     => sprintf(
-                __( 'Synchronizace dokončena. Importováno %d zápasů.', HCJM_TEXT_DOMAIN ),
-                absint( $_GET['imported'] ?? 0 )
-            ),
-            'import_done'   => sprintf(
-                __( 'Import hráčů dokončen. Importováno: %d, přeskočeno: %d.', HCJM_TEXT_DOMAIN ),
-                absint( $_GET['imported'] ?? 0 ),
-                absint( $_GET['skipped']  ?? 0 )
-            ),
-            'import_error'  => sprintf(
-                __( 'Import hráčů dokončen s chybami. Importováno: %d. Podrobnosti viz transient hcjm_import_result.', HCJM_TEXT_DOMAIN ),
-                absint( $_GET['imported'] ?? 0 )
-            ),
-            'error'         => __( 'Nastala chyba. Zkuste to znovu.', HCJM_TEXT_DOMAIN ),
+            'team_saved'    => [ 'success', __( 'Mužstvo bylo uloženo.', HCJM_TEXT_DOMAIN ) ],
+            'player_saved'  => [ 'success', __( 'Hráč byl uložen.', HCJM_TEXT_DOMAIN ) ],
+            'player_deleted'=> [ 'success', __( 'Hráč byl smazán.', HCJM_TEXT_DOMAIN ) ],
+            'staff_saved'   => [ 'success', __( 'Člen realizačního týmu byl uložen.', HCJM_TEXT_DOMAIN ) ],
+            'staff_deleted' => [ 'success', __( 'Člen byl smazán.', HCJM_TEXT_DOMAIN ) ],
+            'match_deleted' => [ 'success', __( 'Zápas byl smazán.', HCJM_TEXT_DOMAIN ) ],
+            'sync_done'     => [ $imported > 0 ? 'success' : 'warning', sprintf(
+                __( 'Synchronizace dokončena. Importováno %d zápasů.', HCJM_TEXT_DOMAIN ), $imported
+            ) ],
+            'import_done'   => [ 'success', sprintf(
+                __( 'Import hráčů dokončen. Importováno: %d, přeskočeno: %d.', HCJM_TEXT_DOMAIN ), $imported, $skipped
+            ) ],
+            'import_error'  => [ 'warning', sprintf(
+                __( 'Import hráčů dokončen s chybami. Importováno: %d.', HCJM_TEXT_DOMAIN ), $imported
+            ) ],
+            'error'         => [ 'error', __( 'Nastala chyba. Zkuste to znovu.', HCJM_TEXT_DOMAIN ) ],
         ];
 
         if ( isset( $messages[ $notice ] ) ) {
-            $type = $notice === 'error' ? 'error' : 'success';
+            [ $type, $text ] = $messages[ $notice ];
             printf(
-                '<div class="notice notice-%s is-dismissible"><p>%s</p></div>',
+                '<div class="notice notice-%s is-dismissible"><p>%s</p>',
                 esc_attr( $type ),
-                esc_html( $messages[ $notice ] )
+                esc_html( $text )
             );
+
+            // Show per-team sync detail when available
+            if ( $notice === 'sync_done' ) {
+                $results = get_transient( 'hcjm_sync_result_' . get_current_user_id() );
+                delete_transient( 'hcjm_sync_result_' . get_current_user_id() );
+
+                if ( is_array( $results ) ) {
+                    $teams    = HCJM_Teams::get_all();
+                    $team_map = [];
+                    foreach ( $teams as $t ) {
+                        $team_map[ $t->ID ] = $t->post_title;
+                    }
+
+                    echo '<table style="border-collapse:collapse;margin-top:8px;font-size:13px">';
+                    echo '<thead><tr><th style="text-align:left;padding:2px 12px 2px 0">' . esc_html__( 'Mužstvo', HCJM_TEXT_DOMAIN ) . '</th>'
+                       . '<th style="text-align:left;padding:2px 12px 2px 0">' . esc_html__( 'Importováno', HCJM_TEXT_DOMAIN ) . '</th>'
+                       . '<th style="text-align:left;padding:2px 0">' . esc_html__( 'Poznámky', HCJM_TEXT_DOMAIN ) . '</th></tr></thead><tbody>';
+
+                    foreach ( $results as $tid => $r ) {
+                        $has_errors = ! empty( $r['errors'] );
+                        $color      = $has_errors ? '#b32d2e' : ( $r['imported'] > 0 ? '#1e7e34' : '#856404' );
+                        echo '<tr>';
+                        printf( '<td style="padding:2px 12px 2px 0">%s</td>', esc_html( $team_map[ $tid ] ?? '#' . $tid ) );
+                        printf( '<td style="padding:2px 12px 2px 0;color:%s"><strong>%d</strong></td>', esc_attr( $color ), (int) $r['imported'] );
+                        $notes = array_merge( $r['errors'] ?? [], $r['imported'] === 0 && empty( $r['errors'] ) ? [ __( 'Žádná data.', HCJM_TEXT_DOMAIN ) ] : [] );
+                        printf( '<td style="color:%s">%s</td>', esc_attr( $color ), esc_html( implode( ' | ', $notes ) ) );
+                        echo '</tr>';
+
+                        // Show debug info when nothing was imported
+                        if ( $r['imported'] === 0 && ! empty( $r['debug'] ) ) {
+                            printf(
+                                '<tr><td colspan="3" style="font-size:11px;color:#555;padding:0 0 4px 0">%s</td></tr>',
+                                esc_html( $r['debug'] )
+                            );
+                        }
+                    }
+                    echo '</tbody></table>';
+                }
+            }
+
+            // Show import detail
+            if ( $notice === 'import_error' || $notice === 'import_done' ) {
+                $result = get_transient( 'hcjm_import_result_' . get_current_user_id() );
+                delete_transient( 'hcjm_import_result_' . get_current_user_id() );
+                if ( is_array( $result ) && ! empty( $result['errors'] ) ) {
+                    echo '<ul style="margin:.5em 0 0 1.5em;list-style:disc">';
+                    foreach ( $result['errors'] as $err ) {
+                        echo '<li>' . esc_html( $err ) . '</li>';
+                    }
+                    echo '</ul>';
+                }
+            }
+
+            echo '</div>';
         }
     }
 }
