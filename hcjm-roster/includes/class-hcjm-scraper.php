@@ -244,6 +244,8 @@ class HCJM_Scraper {
     /**
      * Parse the HTML table page from ceskyhokej.cz.
      *
+     * Expected columns: Datum | Začátek | Domácí | Hosté | Stav (+ optional extras)
+     *
      * @param string $html
      * @param int    $team_id
      * @param string $season
@@ -251,38 +253,59 @@ class HCJM_Scraper {
      * @return array<int,array<string,mixed>>
      */
     private static function parse_html( string $html, int $team_id, string $season, string $external_team_id ): array {
-        $matches = [];
-
         $dom = new DOMDocument();
         libxml_use_internal_errors( true );
         $dom->loadHTML( '<?xml encoding="UTF-8">' . $html );
         libxml_clear_errors();
 
-        $xpath = new DOMXPath( $dom );
+        $xpath   = new DOMXPath( $dom );
+        $matches = [];
 
-        // Try table rows first
-        $rows = $xpath->query( '//table//tr[td]' );
-
-        // Fall back to match/zapas class elements
-        if ( ! $rows || $rows->length === 0 ) {
-            $rows = $xpath->query( '//*[contains(@class,"match") or contains(@class,"zapas") or contains(@class,"game")]' );
+        // Try every table; use the first one whose headers we can recognise
+        $tables = $xpath->query( '//table' );
+        if ( ! $tables ) {
+            return self::parse_embedded_json( $xpath, $team_id, $season );
         }
 
-        if ( $rows ) {
-            foreach ( $rows as $row ) {
-                /** @var DOMElement $row */
-                $cells = $xpath->query( 'td', $row );
-                if ( ! $cells || $cells->length < 4 ) {
+        foreach ( $tables as $table ) {
+            $header_row = $xpath->query( './/tr[1]', $table );
+            if ( ! $header_row || $header_row->length === 0 ) {
+                continue;
+            }
+
+            $header_cells = $xpath->query( './/th | .//td', $header_row->item( 0 ) );
+            if ( ! $header_cells || $header_cells->length < 3 ) {
+                continue;
+            }
+
+            $col = self::detect_ceskyhokej_columns( $header_cells );
+
+            // Need at least Domácí or Hosté to proceed
+            if ( ! isset( $col['home'] ) && ! isset( $col['away'] ) ) {
+                continue;
+            }
+
+            $rows = $xpath->query( './/tr', $table );
+            foreach ( $rows as $i => $row ) {
+                if ( $i === 0 ) {
+                    continue; // skip header
+                }
+                $cells = $xpath->query( './/td', $row );
+                if ( ! $cells || $cells->length < 3 ) {
                     continue;
                 }
-                $data = self::extract_row_data( $cells, $xpath, $team_id, $season );
+                $data = self::extract_named_row( $cells, $xpath, $col, $team_id, $season );
                 if ( $data ) {
                     $matches[] = $data;
                 }
             }
+
+            if ( ! empty( $matches ) ) {
+                return $matches;
+            }
         }
 
-        // Try embedded JSON if table parsing yielded nothing
+        // Fallback: embedded JSON in <script> tags
         if ( empty( $matches ) ) {
             $matches = self::parse_embedded_json( $xpath, $team_id, $season );
         }
@@ -291,89 +314,111 @@ class HCJM_Scraper {
     }
 
     /**
-     * Extract match data from one table row.
+     * Detect ceskyhokej.cz column indices from the header row.
      *
-     * @param DOMNodeList $cells
-     * @return array<string,mixed>|null
+     * Recognised headers: Datum, Začátek / Čas, Domácí, Hosté, Stav / Výsledek
+     *
+     * @param DOMNodeList $header_cells
+     * @return array<string,int>  keys: date, time, home, away, status
      */
-    private static function extract_row_data( $cells, DOMXPath $xpath, int $team_id, string $season ): ?array {
-        $texts = [];
-        for ( $i = 0; $i < $cells->length; $i++ ) {
-            $texts[] = trim( $cells->item( $i )->textContent );
-        }
-
-        // Detect date in any cell (d.m.YYYY, optionally H:MM)
-        $date_str = '';
-        foreach ( $texts as $text ) {
-            if ( preg_match( '/(\d{1,2}\.\d{1,2}\.\d{4})/', $text, $m ) ) {
-                $date_str = $m[1];
-                if ( preg_match( '/(\d{1,2}:\d{2})/', $text, $mt ) ) {
-                    $date_str .= ' ' . $mt[1];
-                }
-                break;
+    private static function detect_ceskyhokej_columns( $header_cells ): array {
+        $col = [];
+        for ( $i = 0; $i < $header_cells->length; $i++ ) {
+            $t = mb_strtolower( trim( $header_cells->item( $i )->textContent ) );
+            if ( strpos( $t, 'datum' ) !== false || strpos( $t, 'dátum' ) !== false ) {
+                $col['date'] = $i;
+            } elseif ( strpos( $t, 'začátek' ) !== false || strpos( $t, 'začatek' ) !== false || $t === 'čas' || $t === 'cas' || strpos( $t, 'čas' ) !== false ) {
+                $col['time'] = $i;
+            } elseif ( strpos( $t, 'domácí' ) !== false || strpos( $t, 'domaci' ) !== false ) {
+                $col['home'] = $i;
+            } elseif ( strpos( $t, 'hosté' ) !== false || strpos( $t, 'hoste' ) !== false ) {
+                $col['away'] = $i;
+            } elseif ( strpos( $t, 'stav' ) !== false || strpos( $t, 'výsledek' ) !== false || strpos( $t, 'vysledek' ) !== false || strpos( $t, 'skóre' ) !== false ) {
+                $col['status'] = $i;
             }
         }
-        if ( ! $date_str ) {
+        return $col;
+    }
+
+    /**
+     * Extract one match from a data row using the named column map.
+     *
+     * @param DOMNodeList          $cells
+     * @param DOMXPath             $xpath
+     * @param array<string,int>    $col     Output of detect_ceskyhokej_columns()
+     * @return array<string,mixed>|null
+     */
+    private static function extract_named_row( $cells, DOMXPath $xpath, array $col, int $team_id, string $season ): ?array {
+        $get = static function( string $key ) use ( $cells, $col ): string {
+            if ( ! isset( $col[ $key ] ) ) {
+                return '';
+            }
+            $cell = $cells->item( $col[ $key ] );
+            return $cell ? trim( $cell->textContent ) : '';
+        };
+
+        $date_raw   = $get( 'date' );
+        $time_raw   = $get( 'time' );
+        $home_name  = trim( $get( 'home' ) );
+        $away_name  = trim( $get( 'away' ) );
+        $status_raw = trim( $get( 'status' ) );
+
+        if ( ! $home_name && ! $away_name ) {
             return null;
+        }
+
+        // Build datetime string: date from Datum cell, time from Začátek cell
+        // Začátek may contain multiple times ("18:00 / 17:00") — take the first
+        $time_clean = '';
+        if ( $time_raw && preg_match( '/(\d{1,2}:\d{2})/', $time_raw, $tm ) ) {
+            $time_clean = $tm[1];
+        }
+
+        $date_str = trim( $date_raw );
+        if ( $time_clean ) {
+            $date_str .= ' ' . $time_clean;
         }
 
         $ts         = self::parse_czech_date( $date_str );
         $match_date = $ts ? gmdate( 'Y-m-d H:i:s', $ts ) : '';
 
-        // Score: "X:Y"
-        $score_text = '';
-        foreach ( $texts as $text ) {
-            if ( preg_match( '/^\d+\s*:\s*\d+$/', trim( $text ) ) ) {
-                $score_text = trim( $text );
-                break;
-            }
+        if ( ! $match_date ) {
+            return null;
         }
 
-        // External ID from link in first cell
-        $external_id = '';
-        $link        = $xpath->query( './/a[@href]', $cells->item( 0 ) );
-        if ( $link && $link->length > 0 ) {
-            /** @var DOMElement $a */
-            $a    = $link->item( 0 );
-            $href = $a->getAttribute( 'href' );
-            $external_id = preg_replace( '/[^a-zA-Z0-9\-_]/', '', basename( $href ) );
-        }
+        // Home/away: "Domácí" = HC Junior Mělník → is_home = true
+        $is_home = self::name_is_ours( $home_name );
+        $opponent = $is_home ? $away_name : $home_name;
 
-        // Team name cells: not date, not score, not short numbers
-        $team_cells = [];
-        foreach ( $texts as $text ) {
-            $clean = trim( $text );
-            if (
-                $clean &&
-                ! preg_match( '/^\d{1,2}\.\d{1,2}\./', $clean ) &&
-                ! preg_match( '/^\d+\s*:\s*\d+$/', $clean ) &&
-                ! preg_match( '/^\d{1,2}\.?$/', $clean ) &&
-                strlen( $clean ) > 2
-            ) {
-                $team_cells[] = $clean;
-            }
-        }
-
-        $home_team = $team_cells[0] ?? '';
-        $away_team = $team_cells[1] ?? '';
-        $is_home   = self::name_is_ours( $home_team );
-        $opponent  = $is_home ? $away_team : $home_team;
-
-        // Parse score
+        // Status + score from "Stav" column
+        // "Připraveno" / "Nový" / "Schváleno" → planned
+        // "X:Y" pattern → played
         $score_home = null;
         $score_away = null;
         $status     = 'planned';
-        if ( $score_text ) {
-            $parts = preg_split( '/\s*:\s*/', $score_text );
-            if ( count( $parts ) === 2 && is_numeric( $parts[0] ) && is_numeric( $parts[1] ) ) {
-                $score_home = (int) $parts[0];
-                $score_away = (int) $parts[1];
-                $status     = 'played';
-            }
+
+        if ( $status_raw && preg_match( '/(\d+)\s*:\s*(\d+)/', $status_raw, $sm ) ) {
+            $score_home = (int) $sm[1];
+            $score_away = (int) $sm[2];
+            $status     = 'played';
         }
 
+        // External ID from any link in the row
+        $external_id = '';
+        for ( $i = 0; $i < $cells->length; $i++ ) {
+            $links = $xpath->query( './/a[@href]', $cells->item( $i ) );
+            if ( $links && $links->length > 0 ) {
+                /** @var DOMElement $a */
+                $a    = $links->item( 0 );
+                $href = $a->getAttribute( 'href' );
+                $external_id = preg_replace( '/[^a-zA-Z0-9\-_]/', '', basename( $href ) );
+                if ( $external_id ) {
+                    break;
+                }
+            }
+        }
         if ( ! $external_id ) {
-            $external_id = md5( $match_date . $home_team . $away_team );
+            $external_id = md5( $match_date . $home_name . $away_name );
         }
 
         return [
@@ -381,7 +426,7 @@ class HCJM_Scraper {
             'season'      => $season,
             'match_date'  => $match_date,
             'is_home'     => $is_home ? 1 : 0,
-            'opponent'    => $opponent ?: ( $is_home ? $away_team : $home_team ),
+            'opponent'    => sanitize_text_field( $opponent ),
             'score_home'  => $score_home,
             'score_away'  => $score_away,
             'status'      => $status,
