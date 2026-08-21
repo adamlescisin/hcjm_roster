@@ -410,8 +410,9 @@ class HCJM_Scraper {
             if ( $links && $links->length > 0 ) {
                 /** @var DOMElement $a */
                 $a    = $links->item( 0 );
-                $href = $a->getAttribute( 'href' );
-                $external_id = preg_replace( '/[^a-zA-Z0-9\-_]/', '', basename( $href ) );
+                $href        = $a->getAttribute( 'href' );
+                $href_path   = parse_url( $href, PHP_URL_PATH ) ?? $href;
+                $external_id = preg_replace( '/[^a-zA-Z0-9\-_]/', '', basename( $href_path ) );
                 if ( $external_id ) {
                     break;
                 }
