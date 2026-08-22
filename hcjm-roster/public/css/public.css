@@ -214,6 +214,17 @@
   --elevation-2: 0 2px 8px rgba(0,0,0,.30);
   --elevation-3: 0 6px 20px rgba(0,0,0,.35);
   --elevation-4: 0 12px 36px rgba(0,0,0,.40);
+  /* Force dark-palette result-row colors — prevents light-mode #ecfdf5 etc.
+     from being used as a background behind white text */
+  --surface-win:  #0d2e1c;
+  --border-win:   #10b981;
+  --text-win:     #6ee7b7;
+  --surface-loss: #2a0e0e;
+  --border-loss:  #ef4444;
+  --text-loss:    #fca5a5;
+  --surface-draw: #2a2007;
+  --border-draw:  #f59e0b;
+  --text-draw:    #fcd34d;
   color: var(--text-body);
   font-family: var(--font-body);
   line-height: 1.55;
@@ -1272,6 +1283,22 @@
 .hcjm .hcjm-match-team            { color: #ffffff; }
 .hcjm .hcjm-match-vs              { color: rgba(255,255,255,.40); }
 .hcjm .hcjm-score                 { color: #ffffff; }
+/* Result rows: keep text legible against the dark win/loss/draw backgrounds */
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-date,
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-date strong,
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-team,
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-score  { color: #6ee7b7; }
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-vs { color: rgba(110,231,183,.40); }
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-date,
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-date strong,
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-team,
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-score  { color: #fca5a5; }
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-vs { color: rgba(252,165,165,.40); }
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-date,
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-date strong,
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-team,
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-score  { color: #fcd34d; }
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-vs { color: rgba(252,211,77,.40); }
 
 /* Match schedule shortcode */
 .hcjm .hcjm-sch-datenum   { color: #ffffff; }
