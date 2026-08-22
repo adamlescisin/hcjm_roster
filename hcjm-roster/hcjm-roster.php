@@ -44,6 +44,12 @@ require_once HCJM_PLUGIN_DIR . 'public/class-hcjm-public.php';
 register_activation_hook( __FILE__, array( 'HCJM_Activator', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'HCJM_Deactivator', 'deactivate' ) );
 
+add_action( 'plugins_loaded', static function (): void {
+    if ( version_compare( (string) get_option( 'hcjm_db_version', '0' ), '1.1.0', '<' ) ) {
+        HCJM_Activator::run_db_upgrade();
+    }
+} );
+
 /**
  * Main plugin initialisation.
  */

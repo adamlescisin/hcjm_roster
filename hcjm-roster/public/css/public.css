@@ -1166,3 +1166,122 @@
     font-size: 0.75rem;
   }
 }
+
+/* ================================================================
+   DARK-SITE TEXT OVERRIDE
+   Force light text on every plugin widget when the site's background
+   is dark but the OS is in light mode. Uses double-class selectors
+   (.hcjm .target) so specificity (0,2,0) beats typical theme rules
+   (.entry-content span = 0,1,1). Hard-coded values bypass CSS
+   variable resolution entirely.
+   ================================================================ */
+
+/* Section headings */
+.hcjm .hcjm-section-heading h2,
+.hcjm .hcjm-section-heading h3 { color: #ffffff; }
+
+/* Staff card — background forced so theme cannot reset it to transparent/white */
+.hcjm .hcjm-staff-card {
+  background:    #1c2130 !important;
+  border:        1px solid rgba(255,255,255,.07) !important;
+  border-radius: 14px !important;
+  overflow:      hidden;
+  box-shadow:    0 6px 20px rgba(0,0,0,.35) !important;
+}
+.hcjm .hcjm-staff-name           { color: #ffffff; }
+.hcjm .hcjm-staff-role           { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-staff-contact        { color: rgba(255,255,255,.60); }
+.hcjm .hcjm-staff-contact a      { color: #8db4e8; text-decoration: none; }
+.hcjm .hcjm-staff-contact a:hover { color: #c8ddf5; text-decoration: underline; }
+.hcjm .hcjm-staff-contact span   { color: rgba(255,255,255,.60); }
+
+/* Player card */
+.hcjm .hcjm-player-lastname  { color: #ffffff; }
+.hcjm .hcjm-player-firstname { color: rgba(255,255,255,.55); }
+
+/* Match list (past/upcoming rows) */
+.hcjm .hcjm-match-date           { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-match-date strong     { color: #ffffff; }
+.hcjm .hcjm-match-team            { color: #ffffff; }
+.hcjm .hcjm-match-vs              { color: rgba(255,255,255,.40); }
+.hcjm .hcjm-score                 { color: #ffffff; }
+
+/* Match schedule shortcode */
+.hcjm .hcjm-sch-datenum   { color: #ffffff; }
+.hcjm .hcjm-sch-day       { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-sch-time      { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-sch-team-us   { color: #ffffff; }
+.hcjm .hcjm-sch-team-opp  { color: rgba(255,255,255,.78); }
+/* Force logo dimensions — theme img rules can inflate them otherwise */
+.hcjm .hcjm-sch-logo-wrap {
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  background: rgba(255,255,255,.04) !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+}
+.hcjm .hcjm-sch-logo-img,
+.hcjm .hcjm-sch-logo-svg {
+  display: block !important;
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  object-fit: contain !important;
+}
+.hcjm .hcjm-sch-vs        { color: rgba(255,255,255,.35); }
+.hcjm .hcjm-sch-round     { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-sch-pill      {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.78);
+}
+.hcjm .hcjm-sch-pill:hover {
+  border-color: #2e73d4;
+  color: #8db4e8;
+}
+.hcjm .hcjm-sch-pill.active {
+  background: #154999;
+  border-color: #154999;
+  color: #ffffff;
+}
+
+/* Next-match banner */
+.hcjm .hcjm-nm-teamlabel   { color: #ffffff; }
+.hcjm .hcjm-nm-vs-time     { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-nm-date        { color: rgba(255,255,255,.80); }
+.hcjm .hcjm-nm-type-badge  { color: rgba(255,255,255,.78); border-color: rgba(255,255,255,.20); }
+.hcjm .hcjm-nm-detail-btn  { color: #ffffff; border-color: rgba(255,255,255,.35); }
+.hcjm .hcjm-nm-detail-btn:hover { background: rgba(255,255,255,.10); color: #ffffff; }
+.hcjm .hcjm-nm-cd-label    { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-nm-started     { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-nm-prev,
+.hcjm .hcjm-nm-next        { color: rgba(255,255,255,.55); border-color: rgba(255,255,255,.18); }
+.hcjm .hcjm-nm-prev:hover,
+.hcjm .hcjm-nm-next:hover  { color: #ffffff; border-color: rgba(255,255,255,.40); background: rgba(255,255,255,.08); }
+.hcjm .hcjm-nm-dot         { background: rgba(255,255,255,.25); }
+.hcjm .hcjm-nm-dot.active  { background: #ffffff; }
+
+/* Friendly / practice match badge */
+.hcjm-friendly-badge,
+.hcjm-sch-friendly-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  background: rgba(245,158,11,.18);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,.35);
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.hcjm .hcjm-nm-friendly-badge {
+  background: rgba(245,158,11,.18);
+  color: #f59e0b;
+  border-color: rgba(245,158,11,.35);
+}

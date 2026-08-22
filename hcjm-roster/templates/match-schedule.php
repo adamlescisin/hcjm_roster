@@ -25,6 +25,9 @@ if ( empty( $matches ) ) {
 $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So', 7 => 'Ne' ];
 
 $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
+
+$club_logo_id  = absint( HCJM_Styles::get_saved()['club_logo'] ?? 0 );
+$club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'thumbnail' ) : '';
 ?>
 <div class="hcjm hcjm-schedule" id="<?php echo esc_attr( $uid ); ?>">
 
@@ -43,13 +46,18 @@ $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
 
     <div class="hcjm-schedule-list">
         <?php foreach ( $matches as $match ) :
-            $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
-            $day_abbr = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
-            $date_str = $ts ? (string) wp_date( 'j. n. Y', $ts ) : '';
-            $time_str = ( $ts && wp_date( 'H:i', $ts ) !== '00:00' ) ? (string) wp_date( 'H:i', $ts ) : '';
-            $round    = ! empty( $match->round ) ? esc_html( $match->round ) : '';
-            $tid      = (int) $match->team_id;
-            $cat      = esc_html( $team_map[ $tid ] ?? '' );
+            $ts         = $match->match_date ? strtotime( $match->match_date ) : 0;
+            $day_abbr   = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
+            $date_str   = $ts ? (string) wp_date( 'j. n. Y', $ts ) : '';
+            $time_str   = ( $ts && wp_date( 'H:i', $ts ) !== '00:00' ) ? (string) wp_date( 'H:i', $ts ) : '';
+            $round       = ! empty( $match->round ) ? esc_html( $match->round ) : '';
+            $is_friendly = ! empty( $match->is_friendly );
+            $tid         = (int) $match->team_id;
+            $cat        = esc_html( $team_map[ $tid ] ?? '' );
+            $opp_name   = esc_html( $match->opponent );
+            $opp_logo   = esc_url( HCJM_Opponents::get_logo_url_by_name( $match->opponent, 'thumbnail' ) );
+            $opp_initials = mb_strtoupper( mb_substr( $match->opponent, 0, 3 ) );
+            $is_home    = (bool) $match->is_home;
         ?>
         <div class="hcjm-sch-row" data-team-id="<?php echo esc_attr( $tid ); ?>">
 
@@ -70,29 +78,77 @@ $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
             </div>
 
             <div class="hcjm-sch-matchup">
-                <span class="hcjm-sch-ha-badge <?php echo $match->is_home ? 'hcjm-home' : 'hcjm-away'; ?>">
-                    <?php echo $match->is_home
+                <span class="hcjm-sch-ha-badge <?php echo $is_home ? 'hcjm-home' : 'hcjm-away'; ?>">
+                    <?php echo $is_home
                         ? esc_html__( 'D', HCJM_TEXT_DOMAIN )
                         : esc_html__( 'V', HCJM_TEXT_DOMAIN ); ?>
                 </span>
-                <span class="hcjm-sch-teams">
-                    <?php if ( $match->is_home ) : ?>
-                        <span class="hcjm-sch-team-us"><?php esc_html_e( 'HC Junior Mělník', HCJM_TEXT_DOMAIN ); ?></span>
-                        <span class="hcjm-sch-vs">vs.</span>
-                        <span class="hcjm-sch-team-opp"><?php echo esc_html( $match->opponent ); ?></span>
-                    <?php else : ?>
-                        <span class="hcjm-sch-team-opp"><?php echo esc_html( $match->opponent ); ?></span>
-                        <span class="hcjm-sch-vs">vs.</span>
-                        <span class="hcjm-sch-team-us"><?php esc_html_e( 'HC Junior Mělník', HCJM_TEXT_DOMAIN ); ?></span>
-                    <?php endif; ?>
-                </span>
+                <div class="hcjm-sch-teams">
+                    <?php
+                    // Determine left/right teams: home team always on left.
+                    if ( $is_home ) {
+                        $left_logo     = $club_logo_url;
+                        $left_alt      = 'HC Junior Mělník';
+                        $left_initials = 'HCJ';
+                        $left_class    = 'hcjm-sch-team-us';
+                        $left_label    = esc_html__( 'HC Junior Mělník', HCJM_TEXT_DOMAIN );
+                        $right_logo    = $opp_logo;
+                        $right_alt     = $opp_name;
+                        $right_initials = $opp_initials;
+                        $right_class   = 'hcjm-sch-team-opp';
+                        $right_label   = $opp_name;
+                    } else {
+                        $left_logo     = $opp_logo;
+                        $left_alt      = $opp_name;
+                        $left_initials = $opp_initials;
+                        $left_class    = 'hcjm-sch-team-opp';
+                        $left_label    = $opp_name;
+                        $right_logo    = $club_logo_url;
+                        $right_alt     = 'HC Junior Mělník';
+                        $right_initials = 'HCJ';
+                        $right_class   = 'hcjm-sch-team-us';
+                        $right_label   = esc_html__( 'HC Junior Mělník', HCJM_TEXT_DOMAIN );
+                    }
+                    ?>
+                    <!-- Left team: logo above name -->
+                    <div class="hcjm-sch-team-block">
+                        <div class="hcjm-sch-logo-wrap">
+                            <?php if ( $left_logo ) : ?>
+                                <img src="<?php echo esc_url( $left_logo ); ?>" alt="<?php echo esc_attr( $left_alt ); ?>" class="hcjm-sch-logo-img">
+                            <?php else : ?>
+                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
+                                    <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+                                    <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" font-family="inherit"><?php echo esc_html( $left_initials ); ?></text>
+                                </svg>
+                            <?php endif; ?>
+                        </div>
+                        <span class="<?php echo $left_class; ?>"><?php echo $left_label; ?></span>
+                    </div>
+                    <span class="hcjm-sch-vs">vs.</span>
+                    <!-- Right team: logo above name -->
+                    <div class="hcjm-sch-team-block">
+                        <div class="hcjm-sch-logo-wrap">
+                            <?php if ( $right_logo ) : ?>
+                                <img src="<?php echo esc_url( $right_logo ); ?>" alt="<?php echo esc_attr( $right_alt ); ?>" class="hcjm-sch-logo-img">
+                            <?php else : ?>
+                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
+                                    <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+                                    <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" font-family="inherit"><?php echo esc_html( $right_initials ); ?></text>
+                                </svg>
+                            <?php endif; ?>
+                        </div>
+                        <span class="<?php echo $right_class; ?>"><?php echo $right_label; ?></span>
+                    </div>
+                </div>
             </div>
 
-            <?php if ( $round ) : ?>
-            <div class="hcjm-sch-round"><?php echo $round; ?></div>
-            <?php else : ?>
-            <div class="hcjm-sch-round"></div>
-            <?php endif; ?>
+            <div class="hcjm-sch-round">
+                <?php if ( $is_friendly ) : ?>
+                    <span class="hcjm-sch-friendly-badge"><?php esc_html_e( 'Přátelský', HCJM_TEXT_DOMAIN ); ?></span>
+                <?php elseif ( $round ) : ?>
+                    <?php echo $round; ?>
+                <?php endif; ?>
+            </div>
 
         </div>
         <?php endforeach; ?>
