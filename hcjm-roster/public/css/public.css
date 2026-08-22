@@ -1366,6 +1366,20 @@
 .hcjm .hcjm-nm-dot.active  { background: #ffffff; }
 
 /* Friendly / practice match badge */
+.hcjm-match-cat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  background: rgba(217,0,13,.18);
+  color: #ff6b6b;
+  border: 1px solid rgba(217,0,13,.35);
+  vertical-align: middle;
+  margin-right: 4px;
+  white-space: nowrap;
+}
 .hcjm-friendly-badge,
 .hcjm-sch-friendly-badge {
   display: inline-block;

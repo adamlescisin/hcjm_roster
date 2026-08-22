@@ -117,6 +117,8 @@ class HCJM_Shortcodes {
         $type  = in_array( $atts['type'], [ 'upcoming', 'past', 'all' ], true ) ? $atts['type'] : 'all';
         $limit = absint( $atts['limit'] );
 
+        $team_map = [];
+
         if ( $atts['team'] ) {
             $team = HCJM_Teams::get_by_slug( $atts['team'] );
             if ( ! $team ) {
@@ -126,10 +128,13 @@ class HCJM_Shortcodes {
             $team_name = esc_html( 'HC Junior Mělník — ' . $team->post_title );
             $order     = '';
         } else {
-            // No team specified — show all teams, newest first.
+            // No team specified — show all teams, newest first, with category badges.
             $team_id   = 0;
             $team_name = esc_html__( 'HC Junior Mělník', HCJM_TEXT_DOMAIN );
             $order     = 'DESC';
+            foreach ( HCJM_Teams::get_all() as $t ) {
+                $team_map[ $t->ID ] = $t->post_title;
+            }
         }
 
         $matches = HCJM_Database::get_matches( $team_id, $atts['season'], $type, $limit, $order );
