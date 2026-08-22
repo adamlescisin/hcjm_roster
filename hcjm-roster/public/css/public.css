@@ -286,6 +286,60 @@
   gap: var(--sp-5);
   padding: var(--sp-1) 0;
 }
+
+/* ── Compact roster table (no avatars) ── */
+.hcjm-roster-table-wrap {
+  overflow-x: auto;
+}
+.hcjm-roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.hcjm-roster-table thead tr {
+  border-bottom: 2px solid rgba(255,255,255,.15);
+}
+.hcjm-roster-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+  white-space: nowrap;
+}
+.hcjm-roster-table tbody .hcjm-rt-row {
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  transition: background .15s;
+}
+.hcjm-roster-table tbody .hcjm-rt-row:hover {
+  background: rgba(255,255,255,.04);
+}
+.hcjm-roster-table td {
+  padding: 9px 12px;
+  vertical-align: middle;
+}
+.hcjm-rt-jersey {
+  width: 48px;
+  text-align: center !important;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+  font-size: 1rem;
+}
+.hcjm-rt-name .hcjm-player-firstname {
+  font-weight: 700;
+  color: #ffffff;
+  margin-right: 4px;
+}
+.hcjm-rt-name .hcjm-player-lastname {
+  color: rgba(255,255,255,.8);
+}
+.hcjm-rt-year {
+  color: rgba(255,255,255,.5);
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
 .hcjm-staff-cards {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }

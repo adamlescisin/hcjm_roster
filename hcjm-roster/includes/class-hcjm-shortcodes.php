@@ -48,10 +48,11 @@ class HCJM_Shortcodes {
             return '<p class="hcjm-error">' . esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) . '</p>';
         }
 
-        $players     = HCJM_Players::get_for_team( $team->ID, $atts['season'] );
-        $has_jersey  = HCJM_Teams::has_jersey_numbers( $team->ID );
-        $team_name   = esc_html( $team->post_title );
-        $season      = esc_html( $atts['season'] );
+        $players      = HCJM_Players::get_for_team( $team->ID, $atts['season'] );
+        $has_jersey   = HCJM_Teams::has_jersey_numbers( $team->ID );
+        $show_avatars = HCJM_Teams::show_avatars( $team->ID );
+        $team_name    = esc_html( $team->post_title );
+        $season       = esc_html( $atts['season'] );
 
         ob_start();
         include HCJM_PLUGIN_DIR . 'templates/roster.php';

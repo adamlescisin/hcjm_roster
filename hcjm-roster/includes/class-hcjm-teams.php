@@ -82,6 +82,12 @@ class HCJM_Teams {
         return (bool) get_post_meta( $team_id, '_hcjm_team_jersey_numbers', true );
     }
 
+    public static function show_avatars( int $team_id ): bool {
+        $val = get_post_meta( $team_id, '_hcjm_team_show_avatars', true );
+        // Default true when meta not yet set (backwards-compatible).
+        return $val === '' || (bool) $val;
+    }
+
     /**
      * Get external (ceskyhokej.cz) team ID.
      *
