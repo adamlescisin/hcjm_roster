@@ -13,10 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$days_cs = [
-    'Mon' => 'Po', 'Tue' => 'Út', 'Wed' => 'St',
-    'Thu' => 'Čt', 'Fri' => 'Pá', 'Sat' => 'So', 'Sun' => 'Ne',
-];
+$days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So', 7 => 'Ne' ];
 ?>
 <div class="hcjm hcjm-matches hcjm-matches-upcoming">
     <?php if ( empty( $matches ) ) : ?>
@@ -33,7 +30,7 @@ $days_cs = [
 
                 // Day-of-week prefix
                 $ts         = $match->match_date ? strtotime( $match->match_date ) : 0;
-                $day_abbr   = $ts ? ( $days_cs[ (string) wp_date( 'D', $ts ) ] ?? '' ) : '';
+                $day_abbr   = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
                 $time_str   = $ts ? (string) wp_date( 'H:i', $ts ) : '';
 
                 $row_class = '';
@@ -45,11 +42,11 @@ $days_cs = [
                     <div class="hcjm-match-date">
                         <?php if ( $day_abbr ) : ?>
                             <strong><?php echo esc_html( $day_abbr . ' ' . $date ); ?></strong>
-                            <?php if ( $time_str && $time_str !== '00:00' ) : ?>
-                                <?php echo esc_html( $time_str ); ?>
-                            <?php endif; ?>
                         <?php else : ?>
-                            <?php echo esc_html( $date ); ?>
+                            <strong><?php echo esc_html( $date ); ?></strong>
+                        <?php endif; ?>
+                        <?php if ( $time_str && $time_str !== '00:00' ) : ?>
+                            <?php echo esc_html( $time_str ); ?>
                         <?php endif; ?>
                     </div>
                     <div class="hcjm-match-teams">

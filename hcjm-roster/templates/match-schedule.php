@@ -22,10 +22,7 @@ if ( empty( $matches ) ) {
     return;
 }
 
-$days_cs = [
-    'Mon' => 'Po', 'Tue' => 'Út', 'Wed' => 'St',
-    'Thu' => 'Čt', 'Fri' => 'Pá', 'Sat' => 'So', 'Sun' => 'Ne',
-];
+$days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So', 7 => 'Ne' ];
 
 $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
 ?>
@@ -47,7 +44,7 @@ $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
     <div class="hcjm-schedule-list">
         <?php foreach ( $matches as $match ) :
             $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
-            $day_abbr = $ts ? ( $days_cs[ (string) wp_date( 'D', $ts ) ] ?? '' ) : '';
+            $day_abbr = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
             $date_str = $ts ? (string) wp_date( 'j. n. Y', $ts ) : '';
             $time_str = ( $ts && wp_date( 'H:i', $ts ) !== '00:00' ) ? (string) wp_date( 'H:i', $ts ) : '';
             $round    = ! empty( $match->round ) ? esc_html( $match->round ) : '';
