@@ -857,15 +857,22 @@
   min-width: 0;
   font-size: 0.82rem;
 }
-/* Each team: logo stacked above name */
+/* Each team: logo + name side-by-side on desktop, stacked on mobile */
 .hcjm-sch-team-block {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 4px;
-  text-align: center;
+  gap: 8px;
   min-width: 0;
-  max-width: 100px;
+}
+@media (max-width: 640px) {
+  .hcjm-sch-team-block {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    max-width: 80px;
+  }
 }
 .hcjm-sch-logo-wrap {
   flex-shrink: 0;
@@ -1333,12 +1340,12 @@
   color: rgba(255,255,255,.78);
 }
 .hcjm .hcjm-sch-pill:hover {
-  border-color: #2e73d4;
-  color: #8db4e8;
+  border-color: #d9000d;
+  color: #ff6b6b;
 }
 .hcjm .hcjm-sch-pill.active {
-  background: #154999;
-  border-color: #154999;
+  background: #d9000d;
+  border-color: #d9000d;
   color: #ffffff;
 }
 
