@@ -947,10 +947,11 @@ class HCJM_Admin {
                                    value="<?php echo esc_attr( $value ); ?>"
                                    min="<?php echo esc_attr( $field['min'] ); ?>"
                                    max="<?php echo esc_attr( $field['max'] ); ?>"
+                                   <?php if ( isset( $field['step'] ) ) : ?>step="<?php echo esc_attr( $field['step'] ); ?>"<?php endif; ?>
                                    oninput="document.getElementById('hcjm_rv_<?php echo esc_attr( $key ); ?>').textContent = this.value + '<?php echo esc_js( $field['unit'] ?? '' ); ?>'">
                             <span id="hcjm_rv_<?php echo esc_attr( $key ); ?>" class="hcjm-range-val"><?php echo esc_html( $value . ( $field['unit'] ?? '' ) ); ?></span>
                             <button type="button" class="button button-small"
-                                onclick="var el=document.getElementById('hcjm_style_<?php echo esc_attr( $key ); ?>');el.value=<?php echo (int) $field['default']; ?>;document.getElementById('hcjm_rv_<?php echo esc_attr( $key ); ?>').textContent=<?php echo (int) $field['default']; ?>+'<?php echo esc_js( $field['unit'] ?? '' ); ?>'">
+                                onclick="var el=document.getElementById('hcjm_style_<?php echo esc_attr( $key ); ?>');el.value=<?php echo esc_js( $field['default'] ); ?>;document.getElementById('hcjm_rv_<?php echo esc_attr( $key ); ?>').textContent=<?php echo esc_js( $field['default'] ); ?>+'<?php echo esc_js( $field['unit'] ?? '' ); ?>'">
                                 <?php esc_html_e( 'Reset', HCJM_TEXT_DOMAIN ); ?>
                             </button>
                         </div>
