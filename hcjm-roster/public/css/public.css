@@ -402,6 +402,12 @@
 }
 
 /* ── Staff table ─────────────────────────────────────────────── */
+.hcjm-staff {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-5);
+  border: 1px solid var(--border-subtle);
+}
 .hcjm-staff-table {
   width: 100%;
   border-collapse: collapse;
