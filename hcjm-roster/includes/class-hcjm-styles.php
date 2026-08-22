@@ -192,7 +192,7 @@ class HCJM_Styles {
                 'label'  => __( 'Číslo dresu', HCJM_TEXT_DOMAIN ),
                 'fields' => [
                     'jersey_font_size' => [
-                        'label'   => __( 'Velikost textu čísla dresu', HCJM_TEXT_DOMAIN ),
+                        'label'   => __( 'Velikost textu čísla dresu (odznak)', HCJM_TEXT_DOMAIN ),
                         'desc'    => __( 'Velikost čísla dresu v odznaku vlevo nahoře na kartě hráče', HCJM_TEXT_DOMAIN ),
                         'type'    => 'range',
                         'default' => '11',
@@ -200,6 +200,17 @@ class HCJM_Styles {
                         'max'     => 20,
                         'unit'    => 'px',
                         'var'     => '--jersey-badge-font-size',
+                    ],
+                    'jersey_placeholder_font_size' => [
+                        'label'   => __( 'Velikost textu čísla dresu (zástupný symbol)', HCJM_TEXT_DOMAIN ),
+                        'desc'    => __( 'Velikost čísla dresu zobrazovaného místo fotografie hráče', HCJM_TEXT_DOMAIN ),
+                        'type'    => 'range',
+                        'default' => '3.5',
+                        'min'     => 1,
+                        'max'     => 8,
+                        'step'    => 0.5,
+                        'unit'    => 'rem',
+                        'var'     => '--jersey-placeholder-font-size',
                     ],
                 ],
             ],
@@ -319,7 +330,7 @@ class HCJM_Styles {
                     }
                 } elseif ( $field['type'] === 'range' ) {
                     $unit  = $field['unit'] ?? '';
-                    $num   = (int) $value;
+                    $num   = isset( $field['step'] ) ? (float) $value : (int) $value;
                     $root_lines[] = "  {$css_var}: {$num}{$unit};";
                 } elseif ( $field['type'] === 'font' ) {
                     $fonts = self::font_options();

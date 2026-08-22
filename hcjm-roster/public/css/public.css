@@ -306,7 +306,7 @@
   background: linear-gradient(160deg, var(--_navy-800) 0%, var(--_navy-500) 100%);
 }
 .hcjm-jersey-placeholder {
-  font-size: 3.5rem;
+  font-size: var(--jersey-placeholder-font-size, 3.5rem);
   font-weight: var(--font-weight-black);
   letter-spacing: -0.06em;
   color: rgba(255,255,255,.65);
