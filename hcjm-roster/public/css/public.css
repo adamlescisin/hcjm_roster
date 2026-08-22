@@ -410,86 +410,67 @@
   box-shadow: none;
 }
 
-/* ── Staff table ─────────────────────────────────────────────── */
+/* ── Staff list (flex, no table) ─────────────────────────────── */
 .hcjm-staff {
   padding: 0;
 }
-.hcjm-staff-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: none !important;
+.hcjm-staff-list {
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-body);
 }
-.hcjm-staff-table tr,
-.hcjm-staff-table td,
-.hcjm-staff-table th {
-  border: none !important;
-  background: transparent !important;
-}
 .hcjm-staff-row {
-  border: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
-.hcjm-staff-td {
-  padding: var(--sp-3) var(--sp-2);
-  vertical-align: middle;
-  border: none !important;
+.hcjm-staff-row:last-child {
+  border-bottom: none;
 }
-.hcjm-staff-td-info {
-  padding-left: 0;
-  width: 100%;
-}
-.hcjm-staff-td-contact {
-  padding-right: 0;
-  text-align: right;
-  white-space: nowrap;
+.hcjm-staff-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 .hcjm-staff-name {
-  display: block;
   font-weight: var(--font-weight-semibold);
   font-size: 0.95rem;
-  color: var(--text-on-dark);
+  color: #ffffff;
   line-height: 1.3;
 }
 .hcjm-staff-role {
-  display: block;
   font-size: 0.82rem;
   font-weight: var(--font-weight-medium);
   color: rgba(255,255,255,.55);
-}
-.hcjm-staff-role-sub {
-  margin-top: 2px;
-  font-size: 0.78rem;
 }
 .hcjm-staff-contact {
   font-size: 0.82rem;
   color: rgba(255,255,255,.55);
   white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
 }
 .hcjm-staff-contact a {
-  color: var(--_navy-200);
+  color: #8db4e8;
   text-decoration: none;
   transition: color var(--motion-fast);
 }
 .hcjm-staff-contact a:hover {
-  color: var(--_navy-100);
+  color: #c8ddf5;
   text-decoration: underline;
 }
 @media (max-width: 480px) {
-  .hcjm-staff-table,
-  .hcjm-staff-table tbody,
-  .hcjm-staff-table tr,
-  .hcjm-staff-table td {
-    display: block;
-  }
   .hcjm-staff-row {
-    padding: var(--sp-3) 0;
+    flex-wrap: wrap;
+    gap: var(--sp-1);
   }
-  .hcjm-staff-td {
-    padding: 1px 0;
-  }
-  .hcjm-staff-td-contact {
+  .hcjm-staff-contact {
+    width: 100%;
     text-align: left;
-    margin-top: var(--sp-1);
   }
 }
 
