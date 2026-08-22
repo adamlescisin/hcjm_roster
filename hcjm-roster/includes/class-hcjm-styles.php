@@ -228,6 +228,18 @@ class HCJM_Styles {
                     'tag_fwd_border' => [ 'label' => __( 'Útočník — rámeček', HCJM_TEXT_DOMAIN ), 'type' => 'color', 'default' => '#fca5a5', 'var' => '--tag-fwd-border' ],
                 ],
             ],
+            'branding' => [
+                'label'  => __( 'Klub', HCJM_TEXT_DOMAIN ),
+                'fields' => [
+                    'club_logo' => [
+                        'label'   => __( 'Logo klubu', HCJM_TEXT_DOMAIN ),
+                        'desc'    => __( 'Logo HC Junior Mělník zobrazené v banneru nadcházejícího zápasu místo iniciál. Doporučený formát: PNG s průhledným pozadím.', HCJM_TEXT_DOMAIN ),
+                        'type'    => 'image',
+                        'default' => '',
+                        'var'     => '',
+                    ],
+                ],
+            ],
             'custom_css' => [
                 'label'  => __( 'Vlastní CSS', HCJM_TEXT_DOMAIN ),
                 'fields' => [
@@ -310,6 +322,10 @@ class HCJM_Styles {
 
                 if ( $field['type'] === 'textarea' ) {
                     $custom_css = wp_strip_all_tags( (string) $value );
+                    continue;
+                }
+
+                if ( $field['type'] === 'image' ) {
                     continue;
                 }
 

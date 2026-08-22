@@ -12,10 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$days_cs = [
-    'Mon' => 'Po', 'Tue' => 'Út', 'Wed' => 'St',
-    'Thu' => 'Čt', 'Fri' => 'Pá', 'Sat' => 'So', 'Sun' => 'Ne',
-];
+$days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So', 7 => 'Ne' ];
 ?>
 <div class="hcjm hcjm-matches hcjm-matches-past">
     <?php if ( empty( $matches ) ) : ?>
@@ -28,7 +25,7 @@ $days_cs = [
                 $date  = HCJM_Matches::format_date( $match );
 
                 $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
-                $day_abbr = $ts ? ( $days_cs[ date( 'D', $ts ) ] ?? '' ) : '';
+                $day_abbr = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
 
                 if ( $won === true )        { $row_class = 'hcjm-win'; }
                 elseif ( $won === false )   { $row_class = 'hcjm-loss'; }

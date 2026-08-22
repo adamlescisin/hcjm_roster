@@ -14,10 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class HCJM_Shortcodes {
 
     public function register(): void {
-        add_shortcode( 'hcjm_roster',     [ $this, 'render_roster' ] );
-        add_shortcode( 'hcjm_staff',      [ $this, 'render_staff' ] );
-        add_shortcode( 'hcjm_matches',    [ $this, 'render_matches' ] );
-        add_shortcode( 'hcjm_next_match', [ $this, 'render_next_match' ] );
+        add_shortcode( 'hcjm_roster',          [ $this, 'render_roster' ] );
+        add_shortcode( 'hcjm_staff',           [ $this, 'render_staff' ] );
+        add_shortcode( 'hcjm_matches',         [ $this, 'render_matches' ] );
+        add_shortcode( 'hcjm_next_match',      [ $this, 'render_next_match' ] );
+        add_shortcode( 'hcjm_match_schedule',  [ $this, 'render_match_schedule' ] );
     }
 
     // -------------------------------------------------------------------------
@@ -154,6 +155,7 @@ class HCJM_Shortcodes {
                 'countdown' => 'yes',
                 'season'    => HCJM_Matches::current_season(),
                 'link'      => '',
+                'badge'     => 'yes',
             ],
             $atts,
             'hcjm_next_match'
@@ -184,6 +186,58 @@ class HCJM_Shortcodes {
 
         ob_start();
         include HCJM_PLUGIN_DIR . 'templates/next-match-banner.php';
+        return (string) ob_get_clean();
+    }
+
+    // -------------------------------------------------------------------------
+    // [hcjm_match_schedule]
+    // -------------------------------------------------------------------------
+
+    /**
+     * Renders a full-club upcoming-match schedule with category filter pills.
+     *
+     * Attributes:
+     *   limit  int     Max matches to show per team category (default 10, 0 = unlimited)
+     *   season string  e.g. "2025-2026" (defaults to current season)
+     *
+     * @param array<string,string>|string $atts
+     * @return string
+     */
+    public function render_match_schedule( $atts ): string {
+        $atts = shortcode_atts(
+            [
+                'limit'  => '10',
+                'season' => HCJM_Matches::current_season(),
+            ],
+            $atts,
+            'hcjm_match_schedule'
+        );
+
+        $per_team = absint( $atts['limit'] );
+        $season   = sanitize_text_field( $atts['season'] );
+
+        $all_teams = HCJM_Teams::get_all();
+        $team_ids  = array_map( static fn( $t ) => $t->ID, $all_teams );
+
+        $matches = HCJM_Database::get_upcoming_multi( $team_ids, $season, $per_team );
+
+        // Build a lookup: team_id → post_title
+        $team_map = [];
+        foreach ( $all_teams as $t ) {
+            $team_map[ $t->ID ] = $t->post_title;
+        }
+
+        // Collect which team IDs actually appear in the result set (preserving order)
+        $active_team_ids = [];
+        foreach ( $matches as $m ) {
+            $tid = (int) $m->team_id;
+            if ( ! in_array( $tid, $active_team_ids, true ) ) {
+                $active_team_ids[] = $tid;
+            }
+        }
+
+        ob_start();
+        include HCJM_PLUGIN_DIR . 'templates/match-schedule.php';
         return (string) ob_get_clean();
     }
 }

@@ -161,6 +161,61 @@ class HCJM_Database {
     }
 
     /**
+     * Get upcoming matches for multiple teams in one query, ordered by date ASC.
+     * Returns at most $per_team rows per team_id.
+     *
+     * @param int[]  $team_ids
+     * @param string $season
+     * @param int    $per_team 0 = unlimited
+     * @return array<int,object>
+     */
+    public static function get_upcoming_multi( array $team_ids, string $season = '', int $per_team = 0 ): array {
+        if ( empty( $team_ids ) ) {
+            return [];
+        }
+
+        global $wpdb;
+        $table = self::table();
+        $now   = current_time( 'mysql' );
+
+        $id_placeholders = implode( ',', array_fill( 0, count( $team_ids ), '%d' ) );
+        $where_parts     = [ 'team_id IN (' . $id_placeholders . ')' ];
+        $prepare_values  = $team_ids;
+
+        $where_parts[]    = "(match_date >= %s OR status = 'planned')";
+        $prepare_values[] = $now;
+
+        if ( $season ) {
+            $where_parts[]    = 'season = %s';
+            $prepare_values[] = $season;
+        }
+
+        $sql = 'SELECT * FROM ' . $table
+            . ' WHERE ' . implode( ' AND ', $where_parts )
+            . ' ORDER BY match_date ASC';
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare( $sql, ...$prepare_values ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        );
+
+        if ( ! $rows || $per_team <= 0 ) {
+            return $rows ?: [];
+        }
+
+        // Enforce per-team cap in PHP to avoid complex SQL
+        $counts = [];
+        $result = [];
+        foreach ( $rows as $row ) {
+            $tid = (int) $row->team_id;
+            $counts[ $tid ] = ( $counts[ $tid ] ?? 0 ) + 1;
+            if ( $counts[ $tid ] <= $per_team ) {
+                $result[] = $row;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Get all matches (admin view), optionally filtered.
      *
      * @param array<string,mixed> $args

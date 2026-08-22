@@ -31,6 +31,9 @@ $months_cs = [
 ];
 
 $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
+
+$club_logo_id  = absint( HCJM_Styles::get_saved()['club_logo'] ?? 0 );
+$club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'medium' ) : '';
 ?>
 <div class="hcjm hcjm-next-match-carousel" id="<?php echo esc_attr( $uid ); ?>" data-active="0">
 
@@ -58,6 +61,7 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
             : ( isset( $team_map[ (int) $match->team_id ] ) ? esc_html( $team_map[ (int) $match->team_id ] ) : '' );
         ?>
         <!-- Header: category badge (left) + match-type badge (right) -->
+        <?php if ( $show_badge || $round ) : ?>
         <div class="hcjm-nm-header">
             <?php if ( $slide_cat ) : ?>
                 <span class="hcjm-nm-cat-badge"><?php echo $slide_cat; ?></span>
@@ -68,16 +72,21 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
                 <span class="hcjm-nm-type-badge"><?php echo $round; ?></span>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
         <!-- Matchup: team — vs+time — team -->
         <div class="hcjm-nm-matchup">
             <?php if ( $is_home ) : ?>
                 <div class="hcjm-nm-team hcjm-nm-team-us">
                     <div class="hcjm-nm-club-logo">
-                        <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
-                            <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
-                            <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="15" font-weight="900" font-family="inherit">HCJ</text>
-                        </svg>
+                        <?php if ( $club_logo_url ) : ?>
+                            <img src="<?php echo esc_url( $club_logo_url ); ?>" alt="HC Junior Mělník" class="hcjm-nm-logo-img">
+                        <?php else : ?>
+                            <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
+                                <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
+                                <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="15" font-weight="900" font-family="inherit">HCJ</text>
+                            </svg>
+                        <?php endif; ?>
                     </div>
                     <span class="hcjm-nm-teamlabel">HC Junior Mělník</span>
                 </div>
@@ -122,10 +131,14 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
                 </div>
                 <div class="hcjm-nm-team hcjm-nm-team-us">
                     <div class="hcjm-nm-club-logo">
-                        <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
-                            <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
-                            <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="15" font-weight="900" font-family="inherit">HCJ</text>
-                        </svg>
+                        <?php if ( $club_logo_url ) : ?>
+                            <img src="<?php echo esc_url( $club_logo_url ); ?>" alt="HC Junior Mělník" class="hcjm-nm-logo-img">
+                        <?php else : ?>
+                            <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
+                                <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
+                                <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="15" font-weight="900" font-family="inherit">HCJ</text>
+                            </svg>
+                        <?php endif; ?>
                     </div>
                     <span class="hcjm-nm-teamlabel">HC Junior Mělník</span>
                 </div>
