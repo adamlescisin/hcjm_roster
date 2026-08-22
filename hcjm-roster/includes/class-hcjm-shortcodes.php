@@ -155,6 +155,7 @@ class HCJM_Shortcodes {
                 'countdown' => 'yes',
                 'season'    => HCJM_Matches::current_season(),
                 'link'      => '',
+                'badge'     => 'yes',
             ],
             $atts,
             'hcjm_next_match'
@@ -169,11 +170,12 @@ class HCJM_Shortcodes {
             return '<p class="hcjm-error">' . esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) . '</p>';
         }
 
-        $count     = max( 1, absint( $atts['count'] ) );
-        $countdown = strtolower( trim( $atts['countdown'] ) ) !== 'no';
-        $matches   = HCJM_Database::get_matches( $team->ID, $atts['season'], 'upcoming', $count );
-        $category  = esc_html( $team->post_title );
-        $link      = esc_url_raw( $atts['link'] );
+        $count      = max( 1, absint( $atts['count'] ) );
+        $countdown  = strtolower( trim( $atts['countdown'] ) ) !== 'no';
+        $show_badge = strtolower( trim( $atts['badge'] ) ) !== 'no';
+        $matches    = HCJM_Database::get_matches( $team->ID, $atts['season'], 'upcoming', $count );
+        $category   = esc_html( $team->post_title );
+        $link       = esc_url_raw( $atts['link'] );
 
         ob_start();
         include HCJM_PLUGIN_DIR . 'templates/next-match-banner.php';

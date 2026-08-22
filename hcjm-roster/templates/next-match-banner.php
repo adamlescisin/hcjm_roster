@@ -6,6 +6,7 @@
  *   $matches    object[]   Upcoming matches (DB rows)
  *   $category   string     Team/category label, e.g. "Dorost"
  *   $countdown  bool       Whether to show the countdown timer
+ *   $show_badge bool       Whether to show the category badge
  *   $count      int        Max matches to show
  *   $link       string     Optional URL for the detail button
  */
@@ -55,12 +56,16 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
          data-ts="<?php echo esc_attr( $match_iso ); ?>">
 
         <!-- Header: category badge (left) + match-type badge (right) -->
+        <?php if ( $show_badge || $round ) : ?>
         <div class="hcjm-nm-header">
-            <span class="hcjm-nm-cat-badge"><?php echo esc_html( $category ); ?></span>
+            <?php if ( $show_badge ) : ?>
+                <span class="hcjm-nm-cat-badge"><?php echo esc_html( $category ); ?></span>
+            <?php endif; ?>
             <?php if ( $round ) : ?>
                 <span class="hcjm-nm-type-badge"><?php echo $round; ?></span>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
         <!-- Matchup: team — vs+time — team -->
         <div class="hcjm-nm-matchup">
