@@ -174,6 +174,9 @@ class HCJM_Database {
         if ( ! empty( $args['season'] ) ) {
             $where[] = $wpdb->prepare( 'season = %s', $args['season'] );
         }
+        if ( ! empty( $args['status'] ) ) {
+            $where[] = $wpdb->prepare( 'status = %s', $args['status'] );
+        }
 
         $where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
         $sql       = "SELECT * FROM {$table} {$where_sql} ORDER BY match_date ASC LIMIT %d OFFSET %d";

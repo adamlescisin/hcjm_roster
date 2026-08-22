@@ -48,7 +48,7 @@ class HCJM_Public {
         if ( ! $post ) {
             return false;
         }
-        $shortcodes = [ 'hcjm_roster', 'hcjm_staff', 'hcjm_matches' ];
+        $shortcodes = [ 'hcjm_roster', 'hcjm_staff', 'hcjm_matches', 'hcjm_next_match' ];
         foreach ( $shortcodes as $sc ) {
             if ( has_shortcode( $post->post_content, $sc ) ) {
                 return true;

@@ -618,11 +618,18 @@ class HCJM_Admin {
             return;
         }
 
-        $filter_team    = isset( $_GET['filter_team'] ) ? absint( $_GET['filter_team'] ) : 0;
+        $filter_team   = isset( $_GET['filter_team'] ) ? absint( $_GET['filter_team'] ) : 0;
+        $filter_status = isset( $_GET['filter_status'] ) ? sanitize_key( $_GET['filter_status'] ) : '';
+        if ( ! in_array( $filter_status, [ 'played', 'planned' ], true ) ) {
+            $filter_status = '';
+        }
 
-        $args    = [ 'season' => $season, 'limit' => 200 ];
+        $args = [ 'season' => $season, 'limit' => 200 ];
         if ( $filter_team ) {
             $args['team_id'] = $filter_team;
+        }
+        if ( $filter_status ) {
+            $args['status'] = $filter_status;
         }
         $matches = HCJM_Database::get_all_matches( $args );
 
@@ -642,12 +649,19 @@ class HCJM_Admin {
                             <?php endforeach; ?>
                         </select>
                     </label>
-                    <label><?php esc_html_e( 'Mužstvo:', HCJM_TEXT_DOMAIN ); ?>
+                    <label><?php esc_html_e( 'Kategorie:', HCJM_TEXT_DOMAIN ); ?>
                         <select name="filter_team" onchange="this.form.submit()">
                             <option value="0"><?php esc_html_e( 'Vše', HCJM_TEXT_DOMAIN ); ?></option>
                             <?php foreach ( $teams as $t ) : ?>
                                 <option value="<?php echo esc_attr( $t->ID ); ?>" <?php selected( $t->ID, $filter_team ); ?>><?php echo esc_html( $t->post_title ); ?></option>
                             <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label><?php esc_html_e( 'Status:', HCJM_TEXT_DOMAIN ); ?>
+                        <select name="filter_status" onchange="this.form.submit()">
+                            <option value=""><?php esc_html_e( 'Vše', HCJM_TEXT_DOMAIN ); ?></option>
+                            <option value="planned" <?php selected( 'planned', $filter_status ); ?>><?php esc_html_e( 'Plánováno', HCJM_TEXT_DOMAIN ); ?></option>
+                            <option value="played"  <?php selected( 'played',  $filter_status ); ?>><?php esc_html_e( 'Odehráno', HCJM_TEXT_DOMAIN ); ?></option>
                         </select>
                     </label>
                 </form>

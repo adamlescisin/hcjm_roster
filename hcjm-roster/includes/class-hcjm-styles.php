@@ -188,6 +188,21 @@ class HCJM_Styles {
                     'text_draw'    => [ 'label' => __( 'Remíza — pill výsledku', HCJM_TEXT_DOMAIN ),        'type' => 'color', 'default' => '#92400e', 'var' => '--text-draw' ],
                 ],
             ],
+            'jersey' => [
+                'label'  => __( 'Číslo dresu', HCJM_TEXT_DOMAIN ),
+                'fields' => [
+                    'jersey_font_size' => [
+                        'label'   => __( 'Velikost textu čísla dresu', HCJM_TEXT_DOMAIN ),
+                        'desc'    => __( 'Velikost čísla dresu v odznaku vlevo nahoře na kartě hráče', HCJM_TEXT_DOMAIN ),
+                        'type'    => 'range',
+                        'default' => '11',
+                        'min'     => 7,
+                        'max'     => 20,
+                        'unit'    => 'px',
+                        'var'     => '--jersey-badge-font-size',
+                    ],
+                ],
+            ],
             'positions' => [
                 'label'  => __( 'Odznaky postů hráčů', HCJM_TEXT_DOMAIN ),
                 'fields' => [
