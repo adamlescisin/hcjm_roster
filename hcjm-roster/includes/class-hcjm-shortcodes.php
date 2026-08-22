@@ -4,7 +4,7 @@
  *
  * [hcjm_roster team="muzi-a" season="2025-2026"]
  * [hcjm_staff  team="muzi-a" season="2025-2026"]
- * [hcjm_matches team="muzi-a" type="upcoming|past|all" limit="10" season="2025-2026"]
+ * [hcjm_matches team="muzi-a" type="upcoming|past|all" limit="10" season="2025-2026"]  (team optional — omit to show all teams newest first)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -117,18 +117,23 @@ class HCJM_Shortcodes {
         $type  = in_array( $atts['type'], [ 'upcoming', 'past', 'all' ], true ) ? $atts['type'] : 'all';
         $limit = absint( $atts['limit'] );
 
-        if ( ! $atts['team'] ) {
-            return '<p class="hcjm-error">' . esc_html__( 'Chybí parametr team.', HCJM_TEXT_DOMAIN ) . '</p>';
+        if ( $atts['team'] ) {
+            $team = HCJM_Teams::get_by_slug( $atts['team'] );
+            if ( ! $team ) {
+                return '<p class="hcjm-error">' . esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) . '</p>';
+            }
+            $team_id   = $team->ID;
+            $team_name = esc_html( 'HC Junior Mělník — ' . $team->post_title );
+            $order     = '';
+        } else {
+            // No team specified — show all teams, newest first.
+            $team_id   = 0;
+            $team_name = esc_html__( 'HC Junior Mělník', HCJM_TEXT_DOMAIN );
+            $order     = 'DESC';
         }
 
-        $team = HCJM_Teams::get_by_slug( $atts['team'] );
-        if ( ! $team ) {
-            return '<p class="hcjm-error">' . esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) . '</p>';
-        }
-
-        $matches   = HCJM_Database::get_matches( $team->ID, $atts['season'], $type, $limit );
-        $team_name = esc_html( 'HC Junior Mělník — ' . $team->post_title );
-        $season    = esc_html( $atts['season'] );
+        $matches = HCJM_Database::get_matches( $team_id, $atts['season'], $type, $limit, $order );
+        $season  = esc_html( $atts['season'] );
 
         ob_start();
         if ( $type === 'past' ) {
