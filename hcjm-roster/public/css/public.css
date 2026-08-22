@@ -401,39 +401,13 @@
   color: var(--text-subtle);
 }
 
-/* ── Staff table ─────────────────────────────────────────────── */
-.hcjm-staff {
-  background: var(--surface-card);
-  border-radius: var(--radius-md);
-  padding: var(--sp-3) var(--sp-5);
-}
-.hcjm-staff-table {
-  width: 100%;
-  border-collapse: collapse;
+/* ── Staff card ──────────────────────────────────────────────── */
+.hcjm-staff-card {
   border: none;
-  font-family: var(--font-body);
+  box-shadow: none;
 }
-.hcjm-staff-table tr,
-.hcjm-staff-table td,
-.hcjm-staff-table th {
-  border: none;
-}
-.hcjm-staff-row {
-  border: none;
-}
-.hcjm-staff-td {
-  padding: var(--sp-3) var(--sp-2);
-  vertical-align: middle;
-  border: none;
-}
-.hcjm-staff-td-info {
-  padding-left: 0;
-  width: 100%;
-}
-.hcjm-staff-td-contact {
-  padding-right: 0;
-  text-align: right;
-  white-space: nowrap;
+.hcjm-staff-card:hover {
+  box-shadow: none;
 }
 .hcjm-staff-name {
   display: block;

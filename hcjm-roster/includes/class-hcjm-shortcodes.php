@@ -161,21 +161,28 @@ class HCJM_Shortcodes {
             'hcjm_next_match'
         );
 
-        if ( ! $atts['category'] ) {
-            return '<p class="hcjm-error">' . esc_html__( 'Chybí parametr category.', HCJM_TEXT_DOMAIN ) . '</p>';
+        $team_id  = 0;
+        $category = '';
+        $team_map = [];
+
+        if ( $atts['category'] ) {
+            $team = HCJM_Teams::get_by_slug( $atts['category'] );
+            if ( ! $team ) {
+                return '<p class="hcjm-error">' . esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) . '</p>';
+            }
+            $team_id  = $team->ID;
+            $category = esc_html( $team->post_title );
+        } else {
+            $all_teams = get_posts( [ 'post_type' => 'hcjm_team', 'numberposts' => -1, 'post_status' => 'publish' ] );
+            foreach ( $all_teams as $t ) {
+                $team_map[ $t->ID ] = $t->post_title;
+            }
         }
 
-        $team = HCJM_Teams::get_by_slug( $atts['category'] );
-        if ( ! $team ) {
-            return '<p class="hcjm-error">' . esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) . '</p>';
-        }
-
-        $count      = max( 1, absint( $atts['count'] ) );
-        $countdown  = strtolower( trim( $atts['countdown'] ) ) !== 'no';
-        $show_badge = strtolower( trim( $atts['badge'] ) ) !== 'no';
-        $matches    = HCJM_Database::get_matches( $team->ID, $atts['season'], 'upcoming', $count );
-        $category   = esc_html( $team->post_title );
-        $link       = esc_url_raw( $atts['link'] );
+        $count     = max( 1, absint( $atts['count'] ) );
+        $countdown = strtolower( trim( $atts['countdown'] ) ) !== 'no';
+        $matches   = HCJM_Database::get_matches( $team_id, $atts['season'], 'upcoming', $count );
+        $link      = esc_url_raw( $atts['link'] );
 
         ob_start();
         include HCJM_PLUGIN_DIR . 'templates/next-match-banner.php';

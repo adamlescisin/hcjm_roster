@@ -3,12 +3,12 @@
  * Template: [hcjm_next_match]
  *
  * Available variables:
- *   $matches    object[]   Upcoming matches (DB rows)
- *   $category   string     Team/category label, e.g. "Dorost"
- *   $countdown  bool       Whether to show the countdown timer
- *   $show_badge bool       Whether to show the category badge
- *   $count      int        Max matches to show
- *   $link       string     Optional URL for the detail button
+ *   $matches    object[]        Upcoming matches (DB rows)
+ *   $category   string          Team/category label (empty = all teams)
+ *   $team_map   array<int,string> team_id → name, populated when category is empty
+ *   $countdown  bool            Whether to show the countdown timer
+ *   $count      int             Max matches to show
+ *   $link       string          Optional URL for the detail button
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,11 +55,18 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
     <div class="hcjm-nm-slide<?php echo $index === 0 ? ' active' : ''; ?>"
          data-ts="<?php echo esc_attr( $match_iso ); ?>">
 
+        <?php
+        $slide_cat = $category !== ''
+            ? $category
+            : ( isset( $team_map[ (int) $match->team_id ] ) ? esc_html( $team_map[ (int) $match->team_id ] ) : '' );
+        ?>
         <!-- Header: category badge (left) + match-type badge (right) -->
         <?php if ( $show_badge || $round ) : ?>
         <div class="hcjm-nm-header">
-            <?php if ( $show_badge ) : ?>
-                <span class="hcjm-nm-cat-badge"><?php echo esc_html( $category ); ?></span>
+            <?php if ( $slide_cat ) : ?>
+                <span class="hcjm-nm-cat-badge"><?php echo $slide_cat; ?></span>
+            <?php else : ?>
+                <span></span>
             <?php endif; ?>
             <?php if ( $round ) : ?>
                 <span class="hcjm-nm-type-badge"><?php echo $round; ?></span>
