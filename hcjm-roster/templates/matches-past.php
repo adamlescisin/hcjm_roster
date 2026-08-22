@@ -28,7 +28,7 @@ $days_cs = [
                 $date  = HCJM_Matches::format_date( $match );
 
                 $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
-                $day_abbr = $ts ? ( $days_cs[ date( 'D', $ts ) ] ?? '' ) : '';
+                $day_abbr = $ts ? ( $days_cs[ (string) wp_date( 'D', $ts ) ] ?? '' ) : '';
 
                 if ( $won === true )        { $row_class = 'hcjm-win'; }
                 elseif ( $won === false )   { $row_class = 'hcjm-loss'; }

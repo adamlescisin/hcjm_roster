@@ -33,8 +33,8 @@ $days_cs = [
 
                 // Day-of-week prefix
                 $ts         = $match->match_date ? strtotime( $match->match_date ) : 0;
-                $day_abbr   = $ts ? ( $days_cs[ date( 'D', $ts ) ] ?? '' ) : '';
-                $time_str   = $ts ? date( 'H:i', $ts ) : '';
+                $day_abbr   = $ts ? ( $days_cs[ (string) wp_date( 'D', $ts ) ] ?? '' ) : '';
+                $time_str   = $ts ? (string) wp_date( 'H:i', $ts ) : '';
 
                 $row_class = '';
                 if ( $is_played && $won === true )  { $row_class = 'hcjm-win'; }

@@ -97,6 +97,6 @@ class HCJM_Matches {
         if ( ! $ts ) {
             return esc_html( $match->match_date );
         }
-        return esc_html( wp_date( 'j. n. Y H:i', $ts ) );
+        return esc_html( (string) wp_date( 'j. n. Y', $ts ) );
     }
 }

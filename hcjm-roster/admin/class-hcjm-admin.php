@@ -975,6 +975,34 @@ class HCJM_Admin {
                                   class="large-text code"
                                   spellcheck="false"><?php echo esc_textarea( (string) $value ); ?></textarea>
 
+                    <?php elseif ( $field['type'] === 'image' ) :
+                        $img_id  = absint( $value );
+                        $img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'thumbnail' ) : '';
+                        $field_id = 'hcjm_style_' . esc_attr( $key );
+                        $preview_id = 'hcjm_style_preview_' . esc_attr( $key );
+                    ?>
+                        <input type="hidden"
+                               id="<?php echo esc_attr( $field_id ); ?>"
+                               name="hcjm_styles[<?php echo esc_attr( $key ); ?>]"
+                               value="<?php echo esc_attr( $img_id ); ?>">
+                        <div id="<?php echo esc_attr( $preview_id ); ?>" style="margin-bottom:8px">
+                            <?php if ( $img_url ) : ?>
+                                <img src="<?php echo esc_url( $img_url ); ?>" style="width:80px;height:80px;object-fit:contain;border:1px solid #ddd;border-radius:6px">
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" class="button hcjm-upload-btn"
+                            data-target="<?php echo esc_attr( $field_id ); ?>"
+                            data-preview="<?php echo esc_attr( $preview_id ); ?>">
+                            <?php esc_html_e( 'Vybrat obrázek', HCJM_TEXT_DOMAIN ); ?>
+                        </button>
+                        <?php if ( $img_id ) : ?>
+                            <button type="button" class="button hcjm-remove-photo"
+                                data-target="<?php echo esc_attr( $field_id ); ?>"
+                                data-preview="<?php echo esc_attr( $preview_id ); ?>">
+                                <?php esc_html_e( 'Odebrat', HCJM_TEXT_DOMAIN ); ?>
+                            </button>
+                        <?php endif; ?>
+
                     <?php endif; ?>
                     </div>
                 </div>
@@ -1670,13 +1698,21 @@ class HCJM_Admin {
                     }
                     break;
                 case 'range':
-                    $saved[ $key ] = (string) max( (int) $field['min'], min( (int) $field['max'], (int) $raw ) );
+                    if ( isset( $field['step'] ) ) {
+                        $num = (float) $raw;
+                        $saved[ $key ] = (string) max( (float) $field['min'], min( (float) $field['max'], $num ) );
+                    } else {
+                        $saved[ $key ] = (string) max( (int) $field['min'], min( (int) $field['max'], (int) $raw ) );
+                    }
                     break;
                 case 'font':
                     $saved[ $key ] = isset( $fonts[ (string) $raw ] ) ? (string) $raw : $field['default'];
                     break;
                 case 'textarea':
                     $saved[ $key ] = wp_strip_all_tags( (string) $raw );
+                    break;
+                case 'image':
+                    $saved[ $key ] = (string) absint( $raw );
                     break;
             }
         }
