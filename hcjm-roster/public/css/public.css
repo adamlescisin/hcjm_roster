@@ -195,7 +195,25 @@
 }
 
 /* ── Base ───────────────────────────────────────────────────── */
+/* Always use dark-palette tokens inside plugin widgets —
+   the website has a dark theme regardless of OS color-scheme. */
 .hcjm {
+  --surface-card:   var(--_neutral-800);
+  --surface-raised: var(--_neutral-800);
+  --surface-muted:  var(--_neutral-900);
+  --text-heading:   var(--_white);
+  --text-body:      var(--_neutral-200);
+  --text-muted:     var(--_neutral-400);
+  --text-subtle:    var(--_neutral-500);
+  --text-link:      var(--_navy-200);
+  --text-link-hover: var(--_navy-100);
+  --border-subtle:  rgba(255,255,255,.06);
+  --border-default: rgba(255,255,255,.12);
+  --border-strong:  rgba(255,255,255,.20);
+  --elevation-1: 0 1px 2px rgba(0,0,0,.25);
+  --elevation-2: 0 2px 8px rgba(0,0,0,.30);
+  --elevation-3: 0 6px 20px rgba(0,0,0,.35);
+  --elevation-4: 0 12px 36px rgba(0,0,0,.40);
   color: var(--text-body);
   font-family: var(--font-body);
   line-height: 1.55;
@@ -401,61 +419,71 @@
   color: var(--text-subtle);
 }
 
-/* ── Staff card ──────────────────────────────────────────────── */
-.hcjm-staff-card {
-  border: none;
-  box-shadow: none;
+/* ── Staff shortcode — card matching next-match design ───────── */
+.hcjm-staff {
+  font-family: var(--font-body);
 }
-.hcjm-staff-card:hover {
-  box-shadow: none;
+.hcjm-staff-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--elevation-3);
+}
+.hcjm-staff-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-6);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.hcjm-staff-row-last {
+  border-bottom: none;
+}
+.hcjm-staff-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 .hcjm-staff-name {
-  display: block;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   font-size: 0.95rem;
-  color: var(--text-heading);
+  color: #ffffff;
   line-height: 1.3;
 }
 .hcjm-staff-role {
-  display: block;
   font-size: 0.82rem;
-  font-weight: var(--font-weight-medium);
-  color: var(--text-muted);
-}
-.hcjm-staff-role-sub {
-  margin-top: 2px;
-  font-size: 0.78rem;
+  font-weight: var(--font-weight-normal);
+  color: rgba(255,255,255,.55);
 }
 .hcjm-staff-contact {
-  font-size: 0.82rem;
-  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: var(--font-weight-medium);
+  color: rgba(255,255,255,.60);
   white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
 }
 .hcjm-staff-contact a {
-  color: var(--text-link);
+  color: #8db4e8;
   text-decoration: none;
   transition: color var(--motion-fast);
 }
 .hcjm-staff-contact a:hover {
-  color: var(--text-link-hover);
+  color: #c8ddf5;
   text-decoration: underline;
 }
-@media (max-width: 480px) {
-  .hcjm-staff-table,
-  .hcjm-staff-table tbody,
-  .hcjm-staff-table tr,
-  .hcjm-staff-table td {
-    display: block;
-  }
+@media (max-width: 520px) {
   .hcjm-staff-row {
-    padding: var(--sp-3) 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+    padding: var(--sp-3) var(--sp-4);
   }
-  .hcjm-staff-td {
-    padding: 1px 0;
-  }
-  .hcjm-staff-td-contact {
+  .hcjm-staff-contact {
     text-align: left;
-    margin-top: var(--sp-1);
   }
 }
 
@@ -814,23 +842,62 @@
 .hcjm-sch-teams {
   display: flex;
   align-items: center;
-  gap: var(--sp-1);
-  flex-wrap: wrap;
+  gap: var(--sp-3);
   min-width: 0;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+}
+/* Each team: logo stacked above name */
+.hcjm-sch-team-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  min-width: 0;
+  max-width: 100px;
+}
+.hcjm-sch-logo-wrap {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.04);
+}
+.hcjm-sch-logo-img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+}
+.hcjm-sch-logo-svg {
+  width: 36px;
+  height: 36px;
 }
 .hcjm-sch-team-us {
   font-weight: var(--font-weight-semibold);
   color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 .hcjm-sch-team-opp {
   color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 .hcjm-sch-vs {
   color: var(--text-subtle);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
-  padding: 0 2px;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 /* Round cell */
