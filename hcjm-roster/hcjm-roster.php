@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'HCJM_VERSION', '1.0.0' );
+define( 'HCJM_VERSION', '2.0.0' );
 define( 'HCJM_PLUGIN_FILE', __FILE__ );
 define( 'HCJM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCJM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -96,7 +96,7 @@ function hcjm_run(): void {
 
     // Public assets
     $public = new HCJM_Public();
-    $loader->add_action( 'wp_enqueue_scripts', $public, 'enqueue_assets' );
+    $loader->add_action( 'wp_enqueue_scripts', $public, 'enqueue_assets', 99 );
 
     $loader->run();
 }
