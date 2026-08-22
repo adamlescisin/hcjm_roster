@@ -28,13 +28,13 @@ $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
 ?>
 <div class="hcjm hcjm-schedule" id="<?php echo esc_attr( $uid ); ?>">
 
+    <?php
+    $default_tid = ! empty( $active_team_ids ) ? $active_team_ids[0] : null;
+    ?>
     <?php if ( count( $active_team_ids ) > 1 ) : ?>
     <div class="hcjm-schedule-filters" role="group" aria-label="<?php esc_attr_e( 'Filtr kategorie', HCJM_TEXT_DOMAIN ); ?>">
-        <button class="hcjm-sch-pill active" data-filter="all">
-            <?php esc_html_e( 'Všechny', HCJM_TEXT_DOMAIN ); ?>
-        </button>
         <?php foreach ( $active_team_ids as $tid ) : ?>
-            <button class="hcjm-sch-pill" data-filter="<?php echo esc_attr( $tid ); ?>">
+            <button class="hcjm-sch-pill<?php echo $tid === $default_tid ? ' active' : ''; ?>" data-filter="<?php echo esc_attr( $tid ); ?>">
                 <?php echo esc_html( $team_map[ $tid ] ?? '' ); ?>
             </button>
         <?php endforeach; ?>
@@ -108,19 +108,23 @@ $uid = 'hcjm-sch-' . wp_generate_password( 6, false, false );
     var pills = wrap.querySelectorAll('.hcjm-sch-pill');
     var rows  = wrap.querySelectorAll('.hcjm-sch-row');
 
+    function applyFilter(filter) {
+        rows.forEach(function(row){
+            row.style.display = (row.dataset.teamId === filter) ? '' : 'none';
+        });
+    }
+
     pills.forEach(function(pill){
         pill.addEventListener('click', function(){
             pills.forEach(function(p){ p.classList.remove('active'); });
             pill.classList.add('active');
-            var filter = pill.dataset.filter;
-            rows.forEach(function(row){
-                if (filter === 'all' || row.dataset.teamId === filter) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+            applyFilter(pill.dataset.filter);
         });
     });
+
+    // Apply the default filter on load
+    <?php if ( $default_tid ) : ?>
+    applyFilter(<?php echo wp_json_encode( (string) $default_tid ); ?>);
+    <?php endif; ?>
 })();
 </script>
