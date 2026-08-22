@@ -72,8 +72,12 @@ class HCJM_Database {
         $table = self::table();
         $now   = current_time( 'mysql' );
 
-        $where   = [ $wpdb->prepare( 'team_id = %d', $team_id ) ];
+        $where   = [];
         $formats = [];
+
+        if ( $team_id > 0 ) {
+            $where[] = $wpdb->prepare( 'team_id = %d', $team_id );
+        }
 
         if ( $season ) {
             $where[] = $wpdb->prepare( 'season = %s', $season );
@@ -89,7 +93,8 @@ class HCJM_Database {
             $order = 'ASC';
         }
 
-        $sql = 'SELECT * FROM ' . $table . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY match_date ' . $order;
+        $where_sql = $where ? ( ' WHERE ' . implode( ' AND ', $where ) ) : '';
+        $sql = 'SELECT * FROM ' . $table . $where_sql . ' ORDER BY match_date ' . $order;
 
         if ( $limit > 0 ) {
             $sql .= $wpdb->prepare( ' LIMIT %d', $limit );
