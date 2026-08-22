@@ -652,6 +652,200 @@
   }
 }
 
+/* ── Match schedule [hcjm_match_schedule] ────────────────────── */
+.hcjm-schedule-empty {
+  padding: var(--sp-6);
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+}
+
+/* Filter pill bar */
+.hcjm-schedule-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+.hcjm-sch-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-default);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1;
+}
+.hcjm-sch-pill:hover {
+  border-color: var(--surface-accent);
+  color: var(--surface-accent);
+}
+.hcjm-sch-pill.active {
+  background: var(--surface-accent);
+  border-color: var(--surface-accent);
+  color: var(--_white);
+}
+
+/* Match rows */
+.hcjm-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.hcjm-sch-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 2fr auto;
+  gap: 0 var(--sp-4);
+  align-items: center;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+  font-family: var(--font-body);
+  transition: box-shadow 0.15s;
+}
+.hcjm-sch-row:hover {
+  box-shadow: var(--elevation-2);
+}
+
+/* Date cell */
+.hcjm-sch-date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hcjm-sch-day {
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+.hcjm-sch-datenum {
+  font-size: 0.88rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-heading);
+}
+.hcjm-sch-time {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* Category badge */
+.hcjm-sch-cat {
+  display: flex;
+  align-items: center;
+}
+.hcjm-sch-cat-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-accent);
+  color: var(--_white);
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Matchup cell */
+.hcjm-sch-matchup {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.hcjm-sch-ha-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+  font-weight: var(--font-weight-bold);
+}
+.hcjm-sch-ha-badge.hcjm-home {
+  background: var(--surface-accent);
+  color: var(--_white);
+}
+.hcjm-sch-ha-badge.hcjm-away {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-default);
+}
+.hcjm-sch-teams {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+  min-width: 0;
+  font-size: 0.9rem;
+}
+.hcjm-sch-team-us {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-heading);
+}
+.hcjm-sch-team-opp {
+  color: var(--text-body);
+}
+.hcjm-sch-vs {
+  color: var(--text-subtle);
+  font-size: 0.78rem;
+  font-weight: var(--font-weight-medium);
+  padding: 0 2px;
+}
+
+/* Round cell */
+.hcjm-sch-round {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hcjm-sch-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: var(--sp-1) var(--sp-3);
+    padding: var(--sp-3);
+  }
+  .hcjm-sch-date {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+  .hcjm-sch-cat {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+  .hcjm-sch-matchup {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .hcjm-sch-round {
+    display: none;
+  }
+}
+@media (max-width: 400px) {
+  .hcjm-sch-teams {
+    font-size: 0.82rem;
+  }
+}
+
 /* ── Next-match banner carousel ──────────────────────────────── */
 .hcjm-next-match-carousel {
   position: relative;
