@@ -405,13 +405,16 @@
 .hcjm-staff-table {
   width: 100%;
   border-collapse: collapse;
+  border: none;
   font-family: var(--font-body);
 }
-.hcjm-staff-row {
-  border-bottom: 1px solid var(--border-subtle);
+.hcjm-staff-table tr,
+.hcjm-staff-table td,
+.hcjm-staff-table th {
+  border: none;
 }
-.hcjm-staff-row:last-child {
-  border-bottom: none;
+.hcjm-staff-row {
+  border: none;
 }
 .hcjm-staff-td {
   padding: var(--sp-3) var(--sp-2);
