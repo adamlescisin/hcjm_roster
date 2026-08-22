@@ -717,7 +717,12 @@ class HCJM_Admin {
                             <td><?php echo esc_html( HCJM_Matches::format_date( $match ) ); ?></td>
                             <td><?php echo esc_html( $team_map[ $match->team_id ] ?? '–' ); ?></td>
                             <td><?php echo $match->is_home ? '<span class="hcjm-badge hcjm-badge-home">D</span>' : '<span class="hcjm-badge hcjm-badge-away">V</span>'; ?></td>
-                            <td><?php echo esc_html( $match->opponent ); ?></td>
+                            <td>
+                                <?php echo esc_html( $match->opponent ); ?>
+                                <?php if ( ! empty( $match->is_friendly ) ) : ?>
+                                    <span class="hcjm-badge hcjm-badge-friendly" style="margin-left:4px;font-size:11px"><?php esc_html_e( 'Přátelský', HCJM_TEXT_DOMAIN ); ?></span>
+                                <?php endif; ?>
+                            </td>
                             <td><strong><?php echo HCJM_Matches::format_score( $match ); ?></strong></td>
                             <td>
                                 <?php if ( $match->status === 'played' ) : ?>
@@ -1397,13 +1402,18 @@ class HCJM_Admin {
         $match_id = absint( $_POST['match_id'] ?? 0 );
         check_admin_referer( 'hcjm_save_match_' . $match_id, 'hcjm_nonce' );
 
-        $team_id    = absint( $_POST['team_id'] ?? 0 );
-        $season     = sanitize_text_field( $_POST['season'] ?? HCJM_Matches::current_season() );
-        $date_part  = sanitize_text_field( $_POST['match_date_date'] ?? '' );
-        $time_part  = sanitize_text_field( $_POST['match_date_time'] ?? '' );
-        $is_home    = absint( $_POST['is_home'] ?? 1 );
-        $opponent   = sanitize_text_field( $_POST['opponent'] ?? '' );
-        $status     = in_array( $_POST['status'] ?? '', [ 'planned', 'played' ], true ) ? $_POST['status'] : 'planned';
+        $team_id     = absint( $_POST['team_id'] ?? 0 );
+        $season      = sanitize_text_field( $_POST['season'] ?? HCJM_Matches::current_season() );
+        $date_part   = sanitize_text_field( $_POST['match_date_date'] ?? '' );
+        $time_part   = sanitize_text_field( $_POST['match_date_time'] ?? '' );
+        $is_home     = absint( $_POST['is_home'] ?? 1 );
+        $is_friendly = isset( $_POST['is_friendly'] ) ? 1 : 0;
+        $status      = in_array( $_POST['status'] ?? '', [ 'planned', 'played' ], true ) ? $_POST['status'] : 'planned';
+
+        // Opponent: the form POSTs "opponent" — could be the manual text field or the hidden field
+        // (both are named "opponent"; the last one in form order wins when both are present).
+        // We simply sanitize whatever arrives.
+        $opponent = sanitize_text_field( $_POST['opponent'] ?? '' );
 
         $score_home_raw = $_POST['score_home'] ?? '';
         $score_away_raw = $_POST['score_away'] ?? '';
@@ -1428,6 +1438,7 @@ class HCJM_Admin {
             'score_home'  => $score_home,
             'score_away'  => $score_away,
             'external_id' => $external_id,
+            'is_friendly' => $is_friendly,
         ] );
 
         wp_safe_redirect( admin_url( 'admin.php?page=hcjm-matches&season=' . urlencode( $season ) ) . '&hcjm_notice=match_saved' );
@@ -1453,12 +1464,16 @@ class HCJM_Admin {
         $score_away_val = $match ? $match->score_away        : '';
         $external_id    = $match ? $match->external_id       : '';
 
+        $is_friendly_val = $match ? (int) ( $match->is_friendly ?? 0 ) : 0;
+
         $date_part = '';
         $time_part = '';
         if ( $match && $match->match_date && $match->match_date !== '0000-00-00 00:00:00' ) {
             $date_part = substr( $match->match_date, 0, 10 );
             $time_part = substr( $match->match_date, 11, 5 );
         }
+
+        $all_opponents = HCJM_Opponents::get_all();
         ?>
         <div class="wrap hcjm-wrap">
             <h1><?php echo $match_id ? esc_html__( 'Upravit zápas', HCJM_TEXT_DOMAIN ) : esc_html__( 'Přidat zápas', HCJM_TEXT_DOMAIN ); ?></h1>
@@ -1509,7 +1524,89 @@ class HCJM_Admin {
                     </tr>
                     <tr>
                         <th><?php esc_html_e( 'Soupeř', HCJM_TEXT_DOMAIN ); ?></th>
-                        <td><input type="text" name="opponent" class="regular-text" value="<?php echo esc_attr( $opponent_val ); ?>" required></td>
+                        <td>
+                            <?php
+                            // Check if current value matches a known opponent
+                            $opponent_in_list = false;
+                            if ( $opponent_val ) {
+                                foreach ( $all_opponents as $opp ) {
+                                    if ( $opp->post_title === $opponent_val ) {
+                                        $opponent_in_list = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            $use_manual = $opponent_val && ! $opponent_in_list;
+                            ?>
+                            <?php if ( ! empty( $all_opponents ) ) : ?>
+                            <select id="hcjm_opponent_select" style="margin-bottom:6px;min-width:200px;<?php echo $use_manual ? 'display:none' : ''; ?>">
+                                <option value=""><?php esc_html_e( '— Vyberte soupeře —', HCJM_TEXT_DOMAIN ); ?></option>
+                                <?php foreach ( $all_opponents as $opp ) : ?>
+                                    <option value="<?php echo esc_attr( $opp->post_title ); ?>" <?php selected( ! $use_manual && $opp->post_title === $opponent_val ); ?>><?php echo esc_html( $opp->post_title ); ?></option>
+                                <?php endforeach; ?>
+                                <option value="__manual__"><?php esc_html_e( '+ Zadat ručně…', HCJM_TEXT_DOMAIN ); ?></option>
+                            </select>
+                            <?php endif; ?>
+                            <div id="hcjm_opponent_manual_wrap" style="<?php echo ( empty( $all_opponents ) || $use_manual ) ? '' : 'display:none'; ?>">
+                                <input type="text" id="hcjm_opponent_manual" name="opponent" class="regular-text" value="<?php echo esc_attr( $use_manual ? $opponent_val : '' ); ?>" placeholder="<?php esc_attr_e( 'Název soupeře', HCJM_TEXT_DOMAIN ); ?>">
+                                <?php if ( ! empty( $all_opponents ) ) : ?>
+                                <button type="button" id="hcjm_opponent_back" class="button button-small" style="margin-left:6px">&larr; <?php esc_html_e( 'Zpět na výběr', HCJM_TEXT_DOMAIN ); ?></button>
+                                <?php endif; ?>
+                            </div>
+                            <!-- Hidden field carries the actual value when dropdown is used -->
+                            <?php if ( ! empty( $all_opponents ) ) : ?>
+                            <input type="hidden" id="hcjm_opponent_hidden" name="opponent" value="<?php echo esc_attr( $use_manual ? '' : $opponent_val ); ?>">
+                            <?php endif; ?>
+                            <script>
+                            (function(){
+                                var sel    = document.getElementById('hcjm_opponent_select');
+                                var wrap   = document.getElementById('hcjm_opponent_manual_wrap');
+                                var manual = document.getElementById('hcjm_opponent_manual');
+                                var hidden = document.getElementById('hcjm_opponent_hidden');
+                                var back   = document.getElementById('hcjm_opponent_back');
+                                if (!sel) return;
+
+                                sel.addEventListener('change', function(){
+                                    if (this.value === '__manual__') {
+                                        sel.style.display = 'none';
+                                        wrap.style.display = '';
+                                        manual.required = true;
+                                        hidden.disabled  = true;
+                                        manual.focus();
+                                    } else {
+                                        hidden.value = this.value;
+                                    }
+                                });
+                                if (back) {
+                                    back.addEventListener('click', function(){
+                                        wrap.style.display = 'none';
+                                        sel.style.display = '';
+                                        manual.required = false;
+                                        manual.value    = '';
+                                        hidden.disabled = false;
+                                        sel.value = '';
+                                        hidden.value = '';
+                                    });
+                                }
+                                // On form submit, make sure hidden carries the right value
+                                sel.closest('form').addEventListener('submit', function(){
+                                    if (sel.style.display !== 'none' && sel.value && sel.value !== '__manual__') {
+                                        hidden.value = sel.value;
+                                    }
+                                });
+                            })();
+                            </script>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Typ zápasu', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="is_friendly" value="1" <?php checked( $is_friendly_val, 1 ); ?>>
+                                <?php esc_html_e( 'Přátelský / přípravný zápas', HCJM_TEXT_DOMAIN ); ?>
+                            </label>
+                            <p class="description"><?php esc_html_e( 'Zaškrtněte, pokud jde o přátelský nebo přípravný zápas. Zobrazí se štítek u výpisu zápasů.', HCJM_TEXT_DOMAIN ); ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e( 'Status', HCJM_TEXT_DOMAIN ); ?></th>

@@ -28,5 +28,6 @@
 }
 .hcjm-badge-home    { background: #dbeafe; color: #1e40af; }
 .hcjm-badge-away    { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
-.hcjm-badge-played  { background: #dcfce7; color: #166534; }
-.hcjm-badge-planned { background: #fef3c7; color: #92400e; }
+.hcjm-badge-played   { background: #dcfce7; color: #166534; }
+.hcjm-badge-planned  { background: #fef3c7; color: #92400e; }
+.hcjm-badge-friendly { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }

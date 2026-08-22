@@ -50,8 +50,9 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'th
             $day_abbr   = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
             $date_str   = $ts ? (string) wp_date( 'j. n. Y', $ts ) : '';
             $time_str   = ( $ts && wp_date( 'H:i', $ts ) !== '00:00' ) ? (string) wp_date( 'H:i', $ts ) : '';
-            $round      = ! empty( $match->round ) ? esc_html( $match->round ) : '';
-            $tid        = (int) $match->team_id;
+            $round       = ! empty( $match->round ) ? esc_html( $match->round ) : '';
+            $is_friendly = ! empty( $match->is_friendly );
+            $tid         = (int) $match->team_id;
             $cat        = esc_html( $team_map[ $tid ] ?? '' );
             $opp_name   = esc_html( $match->opponent );
             $opp_logo   = esc_url( HCJM_Opponents::get_logo_url_by_name( $match->opponent, 'thumbnail' ) );
@@ -141,11 +142,13 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'th
                 </div>
             </div>
 
-            <?php if ( $round ) : ?>
-            <div class="hcjm-sch-round"><?php echo $round; ?></div>
-            <?php else : ?>
-            <div class="hcjm-sch-round"></div>
-            <?php endif; ?>
+            <div class="hcjm-sch-round">
+                <?php if ( $is_friendly ) : ?>
+                    <span class="hcjm-sch-friendly-badge"><?php esc_html_e( 'Přátelský', HCJM_TEXT_DOMAIN ); ?></span>
+                <?php elseif ( $round ) : ?>
+                    <?php echo $round; ?>
+                <?php endif; ?>
+            </div>
 
         </div>
         <?php endforeach; ?>

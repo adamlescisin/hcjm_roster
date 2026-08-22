@@ -1330,3 +1330,25 @@
 .hcjm .hcjm-nm-next:hover  { color: #ffffff; border-color: rgba(255,255,255,.40); background: rgba(255,255,255,.08); }
 .hcjm .hcjm-nm-dot         { background: rgba(255,255,255,.25); }
 .hcjm .hcjm-nm-dot.active  { background: #ffffff; }
+
+/* Friendly / practice match badge */
+.hcjm-friendly-badge,
+.hcjm-sch-friendly-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  background: rgba(245,158,11,.18);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,.35);
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.hcjm .hcjm-nm-friendly-badge {
+  background: rgba(245,158,11,.18);
+  color: #f59e0b;
+  border-color: rgba(245,158,11,.35);
+}

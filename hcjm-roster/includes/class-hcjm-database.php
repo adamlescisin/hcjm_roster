@@ -45,9 +45,10 @@ class HCJM_Database {
             'status'      => sanitize_text_field( $data['status'] ?? 'planned' ),
             'external_id' => $external_id,
             'round'       => sanitize_text_field( $data['round'] ?? '' ),
+            'is_friendly' => isset( $data['is_friendly'] ) ? (int) (bool) $data['is_friendly'] : 0,
         ];
 
-        $formats = [ '%d', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s' ];
+        $formats = [ '%d', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%d' ];
 
         if ( $existing_id ) {
             $wpdb->update( $table, $row, [ 'id' => (int) $existing_id ], $formats, [ '%d' ] );
