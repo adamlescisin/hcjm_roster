@@ -227,7 +227,13 @@ class HCJM_Shortcodes {
             $team_map[ $t->ID ] = $t->post_title;
         }
 
-        // Collect which team IDs actually appear in the result set (preserving order)
+        // Canonical filter-pill order (left → right).
+        $category_order = [
+            'Muži A', 'Dorost', 'Starší žáci', 'Mladší žáci',
+            '4. třída', '3. třída', '2. třída', 'Přípravka',
+        ];
+
+        // Collect which team IDs actually appear in the result set.
         $active_team_ids = [];
         foreach ( $matches as $m ) {
             $tid = (int) $m->team_id;
@@ -235,6 +241,17 @@ class HCJM_Shortcodes {
                 $active_team_ids[] = $tid;
             }
         }
+
+        // Sort active IDs by the canonical order; unknowns go to the end.
+        usort( $active_team_ids, static function ( int $a, int $b ) use ( $team_map, $category_order ): int {
+            $name_a = $team_map[ $a ] ?? '';
+            $name_b = $team_map[ $b ] ?? '';
+            $pos_a  = array_search( $name_a, $category_order, true );
+            $pos_b  = array_search( $name_b, $category_order, true );
+            $pos_a  = $pos_a === false ? PHP_INT_MAX : $pos_a;
+            $pos_b  = $pos_b === false ? PHP_INT_MAX : $pos_b;
+            return $pos_a <=> $pos_b;
+        } );
 
         ob_start();
         include HCJM_PLUGIN_DIR . 'templates/match-schedule.php';
