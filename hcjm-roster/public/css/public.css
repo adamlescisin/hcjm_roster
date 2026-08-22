@@ -694,7 +694,7 @@
 }
 .hcjm-nm-cat-badge {
   display: inline-block;
-  background: var(--_neutral-950);
+  background: var(--surface-accent);
   color: var(--_white);
   font-size: 0.68rem;
   font-weight: var(--font-weight-bold);
