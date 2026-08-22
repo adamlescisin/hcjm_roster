@@ -195,7 +195,25 @@
 }
 
 /* ── Base ───────────────────────────────────────────────────── */
+/* Always use dark-palette tokens inside plugin widgets —
+   the website has a dark theme regardless of OS color-scheme. */
 .hcjm {
+  --surface-card:   var(--_neutral-800);
+  --surface-raised: var(--_neutral-800);
+  --surface-muted:  var(--_neutral-900);
+  --text-heading:   var(--_white);
+  --text-body:      var(--_neutral-200);
+  --text-muted:     var(--_neutral-400);
+  --text-subtle:    var(--_neutral-500);
+  --text-link:      var(--_navy-200);
+  --text-link-hover: var(--_navy-100);
+  --border-subtle:  rgba(255,255,255,.06);
+  --border-default: rgba(255,255,255,.12);
+  --border-strong:  rgba(255,255,255,.20);
+  --elevation-1: 0 1px 2px rgba(0,0,0,.25);
+  --elevation-2: 0 2px 8px rgba(0,0,0,.30);
+  --elevation-3: 0 6px 20px rgba(0,0,0,.35);
+  --elevation-4: 0 12px 36px rgba(0,0,0,.40);
   color: var(--text-body);
   font-family: var(--font-body);
   line-height: 1.55;
