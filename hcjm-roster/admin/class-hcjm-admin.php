@@ -300,7 +300,7 @@ class HCJM_Admin {
                         <tr>
                             <?php if ( $has_jersey ) : ?><td><strong><?php echo esc_html( $m['jersey'] ); ?></strong></td><?php endif; ?>
                             <td><?php if ( $m['photo_id'] ) : ?><img src="<?php echo esc_url( wp_get_attachment_thumb_url( $m['photo_id'] ) ); ?>" class="hcjm-thumb"><?php else : ?>&mdash;<?php endif; ?></td>
-                            <td><?php echo esc_html( $m['last_name'] . ' ' . $m['first_name'] ); ?></td>
+                            <td><?php echo esc_html( $m['first_name'] . ' ' . $m['last_name'] ); ?></td>
                             <td><?php echo esc_html( $positions[ $m['position'] ] ?? $m['position'] ); ?></td>
                             <td><?php echo esc_html( $m['birth_year'] ); ?></td>
                             <td>
@@ -377,11 +377,11 @@ class HCJM_Admin {
                         </td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e( 'Jméno', HCJM_TEXT_DOMAIN ); ?></th>
+                        <th><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></th>
                         <td><input type="text" name="first_name" class="regular-text" value="<?php echo esc_attr( $m['first_name'] ); ?>" required></td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></th>
+                        <th><?php esc_html_e( 'Jméno', HCJM_TEXT_DOMAIN ); ?></th>
                         <td><input type="text" name="last_name" class="regular-text" value="<?php echo esc_attr( $m['last_name'] ); ?>" required></td>
                     </tr>
                     <tr>

@@ -26,13 +26,13 @@ $placeholder_global = $placeholder_att_id ? wp_get_attachment_image_url( $placeh
                 $m         = HCJM_Players::get_meta( $player->ID );
                 $photo_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'medium' ) : $placeholder_global;
                 $pos_label = $positions[ $m['position'] ] ?? $m['position'];
-                $initials  = mb_substr( $m['first_name'], 0, 1 ) . mb_substr( $m['last_name'], 0, 1 );
+                $initials  = mb_substr( $m['last_name'], 0, 1 ) . mb_substr( $m['first_name'], 0, 1 );
             ?>
                 <div class="hcjm-card hcjm-player-card" data-position="<?php echo esc_attr( $m['position'] ); ?>">
                     <div class="hcjm-card-photo">
                         <?php if ( $photo_url ) : ?>
                             <img src="<?php echo esc_url( $photo_url ); ?>"
-                                 alt="<?php echo esc_attr( $m['first_name'] . ' ' . $m['last_name'] ); ?>"
+                                 alt="<?php echo esc_attr( $m['last_name'] . ' ' . $m['first_name'] ); ?>"
                                  loading="lazy"
                                  class="<?php echo ( ! $m['photo_id'] && $placeholder_global ) ? 'hcjm-photo-placeholder-img' : ''; ?>">
                         <?php else : ?>
@@ -50,8 +50,8 @@ $placeholder_global = $placeholder_att_id ? wp_get_attachment_image_url( $placeh
                     </div>
                     <div class="hcjm-card-body">
                         <div class="hcjm-player-name">
-                            <span class="hcjm-player-firstname"><?php echo esc_html( $m['first_name'] ); ?></span>
-                            <span class="hcjm-player-lastname"><?php echo esc_html( $m['last_name'] ); ?></span>
+                            <span class="hcjm-player-firstname"><?php echo esc_html( $m['last_name'] ); ?></span>
+                            <span class="hcjm-player-lastname"><?php echo esc_html( $m['first_name'] ); ?></span>
                         </div>
                         <div class="hcjm-player-meta">
                             <span class="hcjm-tag hcjm-position hcjm-pos-<?php echo esc_attr( $m['position'] ); ?>"><?php echo esc_html( $pos_label ); ?></span>
