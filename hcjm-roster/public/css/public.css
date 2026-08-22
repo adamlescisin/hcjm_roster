@@ -842,24 +842,24 @@
 .hcjm-sch-teams {
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
+  gap: var(--sp-3);
   min-width: 0;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
+/* Each team: logo stacked above name */
 .hcjm-sch-team-block {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  text-align: center;
   min-width: 0;
-}
-.hcjm-sch-team-block-right {
-  flex-direction: row;
+  max-width: 100px;
 }
 .hcjm-sch-logo-wrap {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
@@ -868,33 +868,36 @@
   background: rgba(255,255,255,.04);
 }
 .hcjm-sch-logo-img {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: 36px;
+  height: 36px;
+  max-width: 36px;
+  max-height: 36px;
   object-fit: contain;
 }
 .hcjm-sch-logo-svg {
-  width: 100%;
-  height: 100%;
+  width: 36px;
+  height: 36px;
 }
 .hcjm-sch-team-us {
   font-weight: var(--font-weight-semibold);
   color: var(--text-heading);
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 .hcjm-sch-team-opp {
   color: var(--text-body);
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 .hcjm-sch-vs {
   color: var(--text-subtle);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
-  padding: 0 2px;
   flex-shrink: 0;
+  align-self: center;
 }
 
 /* Round cell */
@@ -1276,7 +1279,25 @@
 .hcjm .hcjm-sch-time      { color: rgba(255,255,255,.55); }
 .hcjm .hcjm-sch-team-us   { color: #ffffff; }
 .hcjm .hcjm-sch-team-opp  { color: rgba(255,255,255,.78); }
-.hcjm .hcjm-sch-logo-wrap { background: rgba(255,255,255,.04) !important; }
+/* Force logo dimensions — theme img rules can inflate them otherwise */
+.hcjm .hcjm-sch-logo-wrap {
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  background: rgba(255,255,255,.04) !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+}
+.hcjm .hcjm-sch-logo-img,
+.hcjm .hcjm-sch-logo-svg {
+  display: block !important;
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  object-fit: contain !important;
+}
 .hcjm .hcjm-sch-vs        { color: rgba(255,255,255,.35); }
 .hcjm .hcjm-sch-round     { color: rgba(255,255,255,.55); }
 .hcjm .hcjm-sch-pill      {

@@ -83,65 +83,61 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'th
                         : esc_html__( 'V', HCJM_TEXT_DOMAIN ); ?>
                 </span>
                 <div class="hcjm-sch-teams">
-                    <?php if ( $is_home ) : ?>
-                        <!-- Home game: [HCJ logo] Us  vs.  Opponent [opp logo] -->
-                        <div class="hcjm-sch-team-block">
-                            <div class="hcjm-sch-logo-wrap">
-                                <?php if ( $club_logo_url ) : ?>
-                                    <img src="<?php echo esc_url( $club_logo_url ); ?>" alt="HC Junior Mělník" class="hcjm-sch-logo-img">
-                                <?php else : ?>
-                                    <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
-                                        <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-                                        <text x="20" y="25" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="900" font-family="inherit">HCJ</text>
-                                    </svg>
-                                <?php endif; ?>
-                            </div>
-                            <span class="hcjm-sch-team-us"><?php esc_html_e( 'HC Junior Mělník', HCJM_TEXT_DOMAIN ); ?></span>
+                    <?php
+                    // Determine left/right teams: home team always on left.
+                    if ( $is_home ) {
+                        $left_logo     = $club_logo_url;
+                        $left_alt      = 'HC Junior Mělník';
+                        $left_initials = 'HCJ';
+                        $left_class    = 'hcjm-sch-team-us';
+                        $left_label    = esc_html__( 'HC Junior Mělník', HCJM_TEXT_DOMAIN );
+                        $right_logo    = $opp_logo;
+                        $right_alt     = $opp_name;
+                        $right_initials = $opp_initials;
+                        $right_class   = 'hcjm-sch-team-opp';
+                        $right_label   = $opp_name;
+                    } else {
+                        $left_logo     = $opp_logo;
+                        $left_alt      = $opp_name;
+                        $left_initials = $opp_initials;
+                        $left_class    = 'hcjm-sch-team-opp';
+                        $left_label    = $opp_name;
+                        $right_logo    = $club_logo_url;
+                        $right_alt     = 'HC Junior Mělník';
+                        $right_initials = 'HCJ';
+                        $right_class   = 'hcjm-sch-team-us';
+                        $right_label   = esc_html__( 'HC Junior Mělník', HCJM_TEXT_DOMAIN );
+                    }
+                    ?>
+                    <!-- Left team: logo above name -->
+                    <div class="hcjm-sch-team-block">
+                        <div class="hcjm-sch-logo-wrap">
+                            <?php if ( $left_logo ) : ?>
+                                <img src="<?php echo esc_url( $left_logo ); ?>" alt="<?php echo esc_attr( $left_alt ); ?>" class="hcjm-sch-logo-img">
+                            <?php else : ?>
+                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
+                                    <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+                                    <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" font-family="inherit"><?php echo esc_html( $left_initials ); ?></text>
+                                </svg>
+                            <?php endif; ?>
                         </div>
-                        <span class="hcjm-sch-vs">vs.</span>
-                        <div class="hcjm-sch-team-block hcjm-sch-team-block-right">
-                            <span class="hcjm-sch-team-opp"><?php echo $opp_name; ?></span>
-                            <div class="hcjm-sch-logo-wrap">
-                                <?php if ( $opp_logo ) : ?>
-                                    <img src="<?php echo $opp_logo; ?>" alt="<?php echo $opp_name; ?>" class="hcjm-sch-logo-img">
-                                <?php else : ?>
-                                    <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
-                                        <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-                                        <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9" font-weight="700" font-family="inherit"><?php echo $opp_initials; ?></text>
-                                    </svg>
-                                <?php endif; ?>
-                            </div>
+                        <span class="<?php echo $left_class; ?>"><?php echo $left_label; ?></span>
+                    </div>
+                    <span class="hcjm-sch-vs">vs.</span>
+                    <!-- Right team: logo above name -->
+                    <div class="hcjm-sch-team-block">
+                        <div class="hcjm-sch-logo-wrap">
+                            <?php if ( $right_logo ) : ?>
+                                <img src="<?php echo esc_url( $right_logo ); ?>" alt="<?php echo esc_attr( $right_alt ); ?>" class="hcjm-sch-logo-img">
+                            <?php else : ?>
+                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
+                                    <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+                                    <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" font-family="inherit"><?php echo esc_html( $right_initials ); ?></text>
+                                </svg>
+                            <?php endif; ?>
                         </div>
-                    <?php else : ?>
-                        <!-- Away game: [Opp logo] Opponent  vs.  Us [HCJ logo] -->
-                        <div class="hcjm-sch-team-block">
-                            <div class="hcjm-sch-logo-wrap">
-                                <?php if ( $opp_logo ) : ?>
-                                    <img src="<?php echo $opp_logo; ?>" alt="<?php echo $opp_name; ?>" class="hcjm-sch-logo-img">
-                                <?php else : ?>
-                                    <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
-                                        <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-                                        <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9" font-weight="700" font-family="inherit"><?php echo $opp_initials; ?></text>
-                                    </svg>
-                                <?php endif; ?>
-                            </div>
-                            <span class="hcjm-sch-team-opp"><?php echo $opp_name; ?></span>
-                        </div>
-                        <span class="hcjm-sch-vs">vs.</span>
-                        <div class="hcjm-sch-team-block hcjm-sch-team-block-right">
-                            <span class="hcjm-sch-team-us"><?php esc_html_e( 'HC Junior Mělník', HCJM_TEXT_DOMAIN ); ?></span>
-                            <div class="hcjm-sch-logo-wrap">
-                                <?php if ( $club_logo_url ) : ?>
-                                    <img src="<?php echo esc_url( $club_logo_url ); ?>" alt="HC Junior Mělník" class="hcjm-sch-logo-img">
-                                <?php else : ?>
-                                    <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
-                                        <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-                                        <text x="20" y="25" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="900" font-family="inherit">HCJ</text>
-                                    </svg>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                        <span class="<?php echo $right_class; ?>"><?php echo $right_label; ?></span>
+                    </div>
                 </div>
             </div>
 
