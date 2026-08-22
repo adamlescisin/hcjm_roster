@@ -414,32 +414,40 @@
   border-bottom: none;
 }
 .hcjm-staff-td {
-  padding: var(--sp-3) var(--sp-3);
+  padding: var(--sp-3) var(--sp-2);
   vertical-align: middle;
   border: none;
 }
-.hcjm-staff-td-name {
+.hcjm-staff-td-info {
   padding-left: 0;
-  white-space: nowrap;
+  width: 100%;
 }
 .hcjm-staff-td-contact {
   padding-right: 0;
   text-align: right;
+  white-space: nowrap;
 }
 .hcjm-staff-name {
+  display: block;
   font-weight: var(--font-weight-semibold);
   font-size: 0.95rem;
   color: var(--text-heading);
+  line-height: 1.3;
 }
 .hcjm-staff-role {
+  display: block;
   font-size: 0.82rem;
   font-weight: var(--font-weight-medium);
   color: var(--text-muted);
 }
+.hcjm-staff-role-sub {
+  margin-top: 2px;
+  font-size: 0.78rem;
+}
 .hcjm-staff-contact {
   font-size: 0.82rem;
   color: var(--text-muted);
-  word-break: break-all;
+  white-space: nowrap;
 }
 .hcjm-staff-contact a {
   color: var(--text-link);
@@ -450,7 +458,7 @@
   color: var(--text-link-hover);
   text-decoration: underline;
 }
-@media (max-width: 500px) {
+@media (max-width: 480px) {
   .hcjm-staff-table,
   .hcjm-staff-table tbody,
   .hcjm-staff-table tr,
@@ -461,13 +469,11 @@
     padding: var(--sp-3) 0;
   }
   .hcjm-staff-td {
-    padding: 2px 0;
+    padding: 1px 0;
   }
   .hcjm-staff-td-contact {
     text-align: left;
-  }
-  .hcjm-staff-td-name {
-    padding-bottom: 0;
+    margin-top: var(--sp-1);
   }
 }
 

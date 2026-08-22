@@ -20,31 +20,32 @@ if ( ! defined( 'ABSPATH' ) ) {
             <tbody>
                 <?php foreach ( $members as $member ) :
                     $m        = HCJM_Staff::get_meta( $member->ID );
+                    $name     = trim( $m['first_name'] . ' ' . $m['last_name'] );
                     $is_email = filter_var( $m['contact'], FILTER_VALIDATE_EMAIL );
                     $is_phone = $m['contact'] && ! $is_email;
                 ?>
                 <tr class="hcjm-staff-row">
-                    <td class="hcjm-staff-td hcjm-staff-td-name">
-                        <span class="hcjm-staff-name"><?php echo esc_html( trim( $m['first_name'] . ' ' . $m['last_name'] ) ); ?></span>
+                    <td class="hcjm-staff-td hcjm-staff-td-info">
+                        <?php if ( $name ) : ?>
+                            <span class="hcjm-staff-name"><?php echo esc_html( $name ); ?></span>
+                        <?php endif; ?>
+                        <?php if ( $m['role'] ) : ?>
+                            <span class="hcjm-staff-role<?php echo $name ? ' hcjm-staff-role-sub' : ''; ?>"><?php echo esc_html( $m['role'] ); ?></span>
+                        <?php endif; ?>
                     </td>
-                    <td class="hcjm-staff-td hcjm-staff-td-role">
-                        <span class="hcjm-staff-role"><?php echo esc_html( $m['role'] ); ?></span>
-                    </td>
-                    <?php if ( $m['contact'] ) : ?>
                     <td class="hcjm-staff-td hcjm-staff-td-contact">
-                        <span class="hcjm-staff-contact">
-                            <?php if ( $is_email ) : ?>
-                                <a href="mailto:<?php echo esc_attr( $m['contact'] ); ?>"><?php echo esc_html( $m['contact'] ); ?></a>
-                            <?php elseif ( $is_phone ) : ?>
-                                <a href="tel:<?php echo esc_attr( preg_replace( '/\s+/', '', $m['contact'] ) ); ?>"><?php echo esc_html( $m['contact'] ); ?></a>
-                            <?php else : ?>
-                                <?php echo esc_html( $m['contact'] ); ?>
-                            <?php endif; ?>
-                        </span>
+                        <?php if ( $m['contact'] ) : ?>
+                            <span class="hcjm-staff-contact">
+                                <?php if ( $is_email ) : ?>
+                                    <a href="mailto:<?php echo esc_attr( $m['contact'] ); ?>"><?php echo esc_html( $m['contact'] ); ?></a>
+                                <?php elseif ( $is_phone ) : ?>
+                                    <a href="tel:<?php echo esc_attr( preg_replace( '/\s+/', '', $m['contact'] ) ); ?>"><?php echo esc_html( $m['contact'] ); ?></a>
+                                <?php else : ?>
+                                    <?php echo esc_html( $m['contact'] ); ?>
+                                <?php endif; ?>
+                            </span>
+                        <?php endif; ?>
                     </td>
-                    <?php else : ?>
-                    <td class="hcjm-staff-td hcjm-staff-td-contact"></td>
-                    <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
