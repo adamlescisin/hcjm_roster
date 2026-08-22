@@ -1208,6 +1208,21 @@
 .hcjm .hcjm-section-heading h2,
 .hcjm .hcjm-section-heading h3 { color: #ffffff; }
 
+/* Staff card — background forced so theme cannot reset it to transparent/white */
+.hcjm .hcjm-staff-card {
+  background:    #1c2130 !important;
+  border:        1px solid rgba(255,255,255,.07) !important;
+  border-radius: 14px !important;
+  overflow:      hidden;
+  box-shadow:    0 6px 20px rgba(0,0,0,.35) !important;
+}
+.hcjm .hcjm-staff-name           { color: #ffffff; }
+.hcjm .hcjm-staff-role           { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-staff-contact        { color: rgba(255,255,255,.60); }
+.hcjm .hcjm-staff-contact a      { color: #8db4e8; text-decoration: none; }
+.hcjm .hcjm-staff-contact a:hover { color: #c8ddf5; text-decoration: underline; }
+.hcjm .hcjm-staff-contact span   { color: rgba(255,255,255,.60); }
+
 /* Player card */
 .hcjm .hcjm-player-lastname  { color: #ffffff; }
 .hcjm .hcjm-player-firstname { color: rgba(255,255,255,.55); }
