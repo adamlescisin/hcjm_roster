@@ -7,6 +7,7 @@
  *   $category   string     Team/category label, e.g. "Dorost"
  *   $countdown  bool       Whether to show the countdown timer
  *   $count      int        Max matches to show
+ *   $link       string     Optional URL for the detail button
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,11 +23,6 @@ if ( empty( $matches ) ) {
     return;
 }
 
-$days_cs = [
-    'Mon' => 'Po', 'Tue' => 'Út', 'Wed' => 'St',
-    'Thu' => 'Čt', 'Fri' => 'Pá', 'Sat' => 'So', 'Sun' => 'Ne',
-];
-
 $months_cs = [
     1 => 'ledna', 2 => 'února', 3 => 'března', 4 => 'dubna',
     5 => 'května', 6 => 'června', 7 => 'července', 8 => 'srpna',
@@ -39,7 +35,6 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
 
     <?php foreach ( $matches as $index => $match ) :
         $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
-        $day_abbr = $ts ? ( $days_cs[ date( 'D', $ts ) ] ?? '' ) : '';
         $day_num  = $ts ? (int) date( 'j', $ts ) : '';
         $month    = $ts ? ( $months_cs[ (int) date( 'n', $ts ) ] ) : '';
         $year     = $ts ? date( 'Y', $ts ) : '';
@@ -48,34 +43,48 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
         $opponent     = esc_html( $match->opponent );
         $opp_logo_url = esc_url( HCJM_Opponents::get_logo_url_by_name( $match->opponent, 'medium' ) );
         $is_home      = (bool) $match->is_home;
+        $round        = ! empty( $match->round ) ? esc_html( $match->round ) : '';
+        $opp_initials = mb_strtoupper( mb_substr( $match->opponent, 0, 3 ) );
 
         $match_iso = $ts ? date( 'c', $ts ) : '';
     ?>
     <div class="hcjm-nm-slide<?php echo $index === 0 ? ' active' : ''; ?>"
          data-ts="<?php echo esc_attr( $match_iso ); ?>">
 
-        <div class="hcjm-nm-category"><?php echo esc_html( $category ); ?></div>
+        <!-- Header: category badge (left) + match-type badge (right) -->
+        <div class="hcjm-nm-header">
+            <span class="hcjm-nm-cat-badge"><?php echo esc_html( $category ); ?></span>
+            <?php if ( $round ) : ?>
+                <span class="hcjm-nm-type-badge"><?php echo $round; ?></span>
+            <?php endif; ?>
+        </div>
 
+        <!-- Matchup: team — vs+time — team -->
         <div class="hcjm-nm-matchup">
             <?php if ( $is_home ) : ?>
                 <div class="hcjm-nm-team hcjm-nm-team-us">
                     <div class="hcjm-nm-club-logo">
-                        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
-                            <circle cx="24" cy="24" r="23" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
-                            <text x="24" y="30" text-anchor="middle" fill="white" font-size="14" font-weight="900" font-family="inherit">HCJ</text>
+                        <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
+                            <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
+                            <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="15" font-weight="900" font-family="inherit">HCJ</text>
                         </svg>
                     </div>
                     <span class="hcjm-nm-teamlabel">HC Junior Mělník</span>
                 </div>
-                <div class="hcjm-nm-vs"><span>vs</span></div>
+                <div class="hcjm-nm-vs">
+                    <span class="hcjm-nm-vs-text">vs</span>
+                    <?php if ( $time_str ) : ?>
+                        <span class="hcjm-nm-vs-time"><?php echo esc_html( $time_str ); ?></span>
+                    <?php endif; ?>
+                </div>
                 <div class="hcjm-nm-team hcjm-nm-team-opp">
                     <div class="hcjm-nm-opp-logo">
                         <?php if ( $opp_logo_url ) : ?>
                             <img src="<?php echo $opp_logo_url; ?>" alt="<?php echo $opponent; ?>" class="hcjm-nm-logo-img">
                         <?php else : ?>
-                            <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
-                                <circle cx="24" cy="24" r="23" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
-                                <text x="24" y="30" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10" font-weight="700" font-family="inherit"><?php echo mb_strtoupper( mb_substr( $match->opponent, 0, 3 ) ); ?></text>
+                            <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
+                                <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
+                                <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="12" font-weight="700" font-family="inherit"><?php echo $opp_initials; ?></text>
                             </svg>
                         <?php endif; ?>
                     </div>
@@ -87,20 +96,25 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
                         <?php if ( $opp_logo_url ) : ?>
                             <img src="<?php echo $opp_logo_url; ?>" alt="<?php echo $opponent; ?>" class="hcjm-nm-logo-img">
                         <?php else : ?>
-                            <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
-                                <circle cx="24" cy="24" r="23" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
-                                <text x="24" y="30" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10" font-weight="700" font-family="inherit"><?php echo mb_strtoupper( mb_substr( $match->opponent, 0, 3 ) ); ?></text>
+                            <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
+                                <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
+                                <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="12" font-weight="700" font-family="inherit"><?php echo $opp_initials; ?></text>
                             </svg>
                         <?php endif; ?>
                     </div>
                     <span class="hcjm-nm-teamlabel"><?php echo $opponent; ?></span>
                 </div>
-                <div class="hcjm-nm-vs"><span>vs</span></div>
+                <div class="hcjm-nm-vs">
+                    <span class="hcjm-nm-vs-text">vs</span>
+                    <?php if ( $time_str ) : ?>
+                        <span class="hcjm-nm-vs-time"><?php echo esc_html( $time_str ); ?></span>
+                    <?php endif; ?>
+                </div>
                 <div class="hcjm-nm-team hcjm-nm-team-us">
                     <div class="hcjm-nm-club-logo">
-                        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
-                            <circle cx="24" cy="24" r="23" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
-                            <text x="24" y="30" text-anchor="middle" fill="white" font-size="14" font-weight="900" font-family="inherit">HCJ</text>
+                        <svg viewBox="0 0 60 60" fill="none" aria-hidden="true" class="hcjm-nm-logo-svg">
+                            <circle cx="30" cy="30" r="29" fill="#f2f5f8" stroke="#c8d3df" stroke-width="1.5"/>
+                            <text x="30" y="37" text-anchor="middle" fill="#2d3340" font-size="15" font-weight="900" font-family="inherit">HCJ</text>
                         </svg>
                     </div>
                     <span class="hcjm-nm-teamlabel">HC Junior Mělník</span>
@@ -108,42 +122,40 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
             <?php endif; ?>
         </div>
 
-        <div class="hcjm-nm-datetime">
-            <span class="hcjm-nm-badge <?php echo $is_home ? 'hcjm-nm-badge-home' : 'hcjm-nm-badge-away'; ?>">
-                <?php echo $is_home ? esc_html__( 'Domácí', HCJM_TEXT_DOMAIN ) : esc_html__( 'Hosté', HCJM_TEXT_DOMAIN ); ?>
-            </span>
+        <!-- Date -->
+        <div class="hcjm-nm-info">
             <?php if ( $ts ) : ?>
-                <span class="hcjm-nm-date">
-                    <?php echo esc_html( $day_abbr . ' ' . $day_num . '. ' . $month . ' ' . $year ); ?>
-                </span>
-                <?php if ( $time_str ) : ?>
-                    <span class="hcjm-nm-time"><?php echo esc_html( $time_str ); ?></span>
-                <?php endif; ?>
+                <span class="hcjm-nm-date"><?php echo esc_html( $day_num . '. ' . $month . ', ' . $year ); ?></span>
             <?php else : ?>
                 <span class="hcjm-nm-date"><?php esc_html_e( 'Datum bude upřesněno', HCJM_TEXT_DOMAIN ); ?></span>
             <?php endif; ?>
         </div>
 
+        <!-- Optional detail link -->
+        <?php if ( ! empty( $link ) ) : ?>
+            <a href="<?php echo esc_url( $link ); ?>" class="hcjm-nm-detail-btn">
+                <?php esc_html_e( 'Zobrazit podrobnosti', HCJM_TEXT_DOMAIN ); ?>
+            </a>
+        <?php endif; ?>
+
+        <!-- Countdown -->
         <?php if ( $countdown && $ts > time() ) : ?>
         <div class="hcjm-nm-countdown" data-target="<?php echo esc_attr( $match_iso ); ?>">
             <div class="hcjm-nm-cd-unit">
                 <span class="hcjm-nm-cd-value" data-unit="d">–</span>
-                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'dní', HCJM_TEXT_DOMAIN ); ?></span>
+                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'DNY', HCJM_TEXT_DOMAIN ); ?></span>
             </div>
-            <div class="hcjm-nm-cd-sep">:</div>
             <div class="hcjm-nm-cd-unit">
                 <span class="hcjm-nm-cd-value" data-unit="h">–</span>
-                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'hod', HCJM_TEXT_DOMAIN ); ?></span>
+                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'HODINY', HCJM_TEXT_DOMAIN ); ?></span>
             </div>
-            <div class="hcjm-nm-cd-sep">:</div>
             <div class="hcjm-nm-cd-unit">
                 <span class="hcjm-nm-cd-value" data-unit="m">–</span>
-                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'min', HCJM_TEXT_DOMAIN ); ?></span>
+                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'MINUTY', HCJM_TEXT_DOMAIN ); ?></span>
             </div>
-            <div class="hcjm-nm-cd-sep">:</div>
             <div class="hcjm-nm-cd-unit">
                 <span class="hcjm-nm-cd-value" data-unit="s">–</span>
-                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'sek', HCJM_TEXT_DOMAIN ); ?></span>
+                <span class="hcjm-nm-cd-label"><?php esc_html_e( 'SEKUNDY', HCJM_TEXT_DOMAIN ); ?></span>
             </div>
         </div>
         <?php elseif ( $countdown ) : ?>
@@ -194,11 +206,14 @@ $uid = 'hcjm-nm-' . wp_generate_password( 6, false, false );
     function pad(n){ return n < 10 ? '0'+n : String(n); }
 
     function updateCountdown(el){
+        if ( el.dataset.done ) return;
         var target = new Date(el.dataset.target).getTime();
         var now    = Date.now();
         var diff   = target - now;
         if (diff <= 0) {
-            el.innerHTML = '<span class="hcjm-nm-started"><?php echo esc_js( __( 'Zápas právě probíhá nebo již skončil.', HCJM_TEXT_DOMAIN ) ); ?></span>';
+            el.dataset.done = '1';
+            el.className    = 'hcjm-nm-started';
+            el.textContent  = <?php echo wp_json_encode( __( 'Zápas právě probíhá nebo již skončil.', HCJM_TEXT_DOMAIN ) ); ?>;
             return;
         }
         var d = Math.floor(diff / 86400000);
