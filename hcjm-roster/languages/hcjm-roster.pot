@@ -270,7 +270,7 @@ msgstr ""
 msgid "Asistent trenéra"
 msgstr ""
 
-msgid "Vedoucí mužstva"
+msgid "Vedoucí týmu"
 msgstr ""
 
 msgid "Fyzioterapeut"

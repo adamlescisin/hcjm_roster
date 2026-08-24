@@ -98,7 +98,7 @@ class HCJM_Staff {
         return [
             __( 'Hlavní trenér', HCJM_TEXT_DOMAIN ),
             __( 'Asistent trenéra', HCJM_TEXT_DOMAIN ),
-            __( 'Vedoucí mužstva', HCJM_TEXT_DOMAIN ),
+            __( 'Vedoucí týmu', HCJM_TEXT_DOMAIN ),
             __( 'Fyzioterapeut', HCJM_TEXT_DOMAIN ),
             __( 'Lékař', HCJM_TEXT_DOMAIN ),
             __( 'Masér', HCJM_TEXT_DOMAIN ),
