@@ -7,6 +7,7 @@
  *   $team_name  string
  *   $season     string
  *   $type       string    'upcoming'|'all'
+ *   $team_map   array<int,string>  populated when no team filter active
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,6 +54,9 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
                         <span class="hcjm-match-badge <?php echo $match->is_home ? 'hcjm-home' : 'hcjm-away'; ?>">
                             <?php echo $match->is_home ? esc_html__( 'Domácí', HCJM_TEXT_DOMAIN ) : esc_html__( 'Hosté', HCJM_TEXT_DOMAIN ); ?>
                         </span>
+                        <?php if ( ! empty( $team_map ) ) : ?>
+                            <span class="hcjm-match-cat-badge"><?php echo esc_html( $team_map[ (int) $match->team_id ] ?? '' ); ?></span>
+                        <?php endif; ?>
                         <span class="hcjm-match-matchup">
                             <?php if ( $match->is_home ) : ?>
                                 <span class="hcjm-match-team hcjm-match-team-us"><?php echo $team_name; ?></span>
