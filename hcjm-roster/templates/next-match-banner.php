@@ -37,12 +37,24 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
 ?>
 <div class="hcjm hcjm-next-match-carousel" id="<?php echo esc_attr( $uid ); ?>" data-active="0">
 
-    <?php foreach ( $matches as $index => $match ) :
-        $ts       = $match->match_date ? strtotime( $match->match_date ) : 0;
-        $day_num  = $ts ? (int) date( 'j', $ts ) : '';
-        $month    = $ts ? ( $months_cs[ (int) date( 'n', $ts ) ] ) : '';
-        $year     = $ts ? date( 'Y', $ts ) : '';
-        $time_str = ( $ts && date( 'H:i', $ts ) !== '00:00' ) ? date( 'H:i', $ts ) : '';
+    <?php
+    $wp_tz = wp_timezone();
+    foreach ( $matches as $index => $match ) :
+        // Parse the stored local Czech time correctly using WP timezone.
+        $ts = 0;
+        if ( $match->match_date ) {
+            try {
+                $dt = new DateTimeImmutable( $match->match_date, $wp_tz );
+                $ts = $dt->getTimestamp();
+            } catch ( Exception $e ) {
+                $ts = 0;
+            }
+        }
+        // Display in WP (Czech) local time.
+        $day_num  = $ts ? (int) wp_date( 'j', $ts ) : '';
+        $month    = $ts ? ( $months_cs[ (int) wp_date( 'n', $ts ) ] ) : '';
+        $year     = $ts ? wp_date( 'Y', $ts ) : '';
+        $time_str = ( $ts && wp_date( 'H:i', $ts ) !== '00:00' ) ? wp_date( 'H:i', $ts ) : '';
 
         $opponent     = esc_html( $match->opponent );
         $opp_logo_url = esc_url( HCJM_Opponents::get_logo_url_by_name( $match->opponent, 'medium' ) );
@@ -51,7 +63,8 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
         $opp_initials = mb_strtoupper( mb_substr( $match->opponent, 0, 3 ) );
         $is_friendly  = ! empty( $match->is_friendly );
 
-        $match_iso = $ts ? date( 'c', $ts ) : '';
+        // UTC ISO string — unambiguous for the browser's new Date().
+        $match_iso = $ts ? gmdate( 'c', $ts ) : '';
     ?>
     <div class="hcjm-nm-slide<?php echo $index === 0 ? ' active' : ''; ?>"
          data-ts="<?php echo esc_attr( $match_iso ); ?>">
@@ -209,6 +222,8 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
     var wrap = document.getElementById(<?php echo wp_json_encode( $uid ); ?>);
     if (!wrap) return;
 
+    var noMatchesMsg = <?php echo wp_json_encode( __( 'Další zápasy plánujeme', HCJM_TEXT_DOMAIN ) ); ?>;
+
     // Carousel
     var slides = wrap.querySelectorAll('.hcjm-nm-slide');
     var dots   = wrap.querySelectorAll('.hcjm-nm-dot');
@@ -222,11 +237,39 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
         if (dots[active]) dots[active].classList.add('active');
     }
 
+    // Returns the index of the first slide at or after fromIdx whose match is in the future.
+    // Returns -1 if none found.
+    function findNextFuture(fromIdx) {
+        var now = Date.now();
+        for (var i = fromIdx; i < slides.length; i++) {
+            var ts = slides[i].dataset.ts;
+            if (ts && new Date(ts).getTime() > now) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Replace the entire banner with the "no upcoming matches" message.
+    function showNoMatches() {
+        wrap.innerHTML = '<div class="hcjm-nm-no-matches"><span class="hcjm-nm-no-matches-icon">&#128197;</span>' + noMatchesMsg + '</div>';
+    }
+
     var prev = wrap.querySelector('.hcjm-nm-prev');
     var next = wrap.querySelector('.hcjm-nm-next');
     if (prev) prev.addEventListener('click', function(){ goTo(active - 1); });
     if (next) next.addEventListener('click', function(){ goTo(active + 1); });
     dots.forEach(function(dot){ dot.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); }); });
+
+    // On load: jump straight to the first future slide.
+    var firstFuture = findNextFuture(0);
+    if (firstFuture === -1) {
+        showNoMatches();
+        return;
+    }
+    if (firstFuture !== 0) {
+        goTo(firstFuture);
+    }
 
     // Countdown timers
     function pad(n){ return n < 10 ? '0'+n : String(n); }
@@ -240,6 +283,13 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'me
             el.dataset.done = '1';
             el.className    = 'hcjm-nm-started';
             el.textContent  = <?php echo wp_json_encode( __( 'Zápas právě probíhá nebo již skončil.', HCJM_TEXT_DOMAIN ) ); ?>;
+            // Auto-advance to next future slide.
+            var nextFuture = findNextFuture(active + 1);
+            if (nextFuture !== -1) {
+                goTo(nextFuture);
+            } else {
+                showNoMatches();
+            }
             return;
         }
         var d = Math.floor(diff / 86400000);
