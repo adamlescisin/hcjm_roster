@@ -53,7 +53,14 @@ class HCJM_Matches {
         if ( $match->score_home === null || $match->score_away === null ) {
             return '–';
         }
-        return esc_html( $match->score_home . ':' . $match->score_away );
+        // score_home = HCJM's goals, score_away = opponent's goals (always).
+        // Hockey notation puts the HOME side first regardless of who we are.
+        $ours   = (int) $match->score_home;
+        $theirs = (int) $match->score_away;
+        if ( $match->is_home ) {
+            return esc_html( $ours . ':' . $theirs );
+        }
+        return esc_html( $theirs . ':' . $ours );
     }
 
     /**
