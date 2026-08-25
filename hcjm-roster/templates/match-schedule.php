@@ -112,11 +112,11 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'th
                     ?>
                     <!-- Left team: logo above name -->
                     <div class="hcjm-sch-team-block">
-                        <div class="hcjm-sch-logo-wrap">
+                        <div class="hcjm-sch-logo-wrap" style="width:44px;height:44px;min-width:44px;max-width:44px;overflow:hidden;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.04)">
                             <?php if ( $left_logo ) : ?>
-                                <img src="<?php echo esc_url( $left_logo ); ?>" alt="<?php echo esc_attr( $left_alt ); ?>" class="hcjm-sch-logo-img">
+                                <img src="<?php echo esc_url( $left_logo ); ?>" alt="<?php echo esc_attr( $left_alt ); ?>" class="hcjm-sch-logo-img" style="width:44px;height:44px;max-width:44px;max-height:44px;object-fit:contain;display:block">
                             <?php else : ?>
-                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
+                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true" style="width:44px;height:44px;display:block">
                                     <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
                                     <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" font-family="inherit"><?php echo esc_html( $left_initials ); ?></text>
                                 </svg>
@@ -127,11 +127,11 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'th
                     <span class="hcjm-sch-vs">vs.</span>
                     <!-- Right team: logo above name -->
                     <div class="hcjm-sch-team-block">
-                        <div class="hcjm-sch-logo-wrap">
+                        <div class="hcjm-sch-logo-wrap" style="width:44px;height:44px;min-width:44px;max-width:44px;overflow:hidden;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.04)">
                             <?php if ( $right_logo ) : ?>
-                                <img src="<?php echo esc_url( $right_logo ); ?>" alt="<?php echo esc_attr( $right_alt ); ?>" class="hcjm-sch-logo-img">
+                                <img src="<?php echo esc_url( $right_logo ); ?>" alt="<?php echo esc_attr( $right_alt ); ?>" class="hcjm-sch-logo-img" style="width:44px;height:44px;max-width:44px;max-height:44px;object-fit:contain;display:block">
                             <?php else : ?>
-                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true">
+                                <svg viewBox="0 0 40 40" class="hcjm-sch-logo-svg" aria-hidden="true" style="width:44px;height:44px;display:block">
                                     <circle cx="20" cy="20" r="19" fill="#1c2130" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
                                     <text x="20" y="25" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" font-family="inherit"><?php echo esc_html( $right_initials ); ?></text>
                                 </svg>

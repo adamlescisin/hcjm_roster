@@ -61,11 +61,19 @@ class HCJM_Staff {
      * @param int $post_id
      * @return array<string,mixed>
      */
+    /** Legacy role names → current names, for records saved before a rename. */
+    private static array $role_aliases = [
+        'Vedoucí mužstva' => 'Vedoucí týmu',
+    ];
+
     public static function get_meta( int $post_id ): array {
+        $role = (string) get_post_meta( $post_id, '_hcjm_staff_role', true );
+        $role = self::$role_aliases[ $role ] ?? $role;
+
         return [
             'first_name' => (string) get_post_meta( $post_id, '_hcjm_staff_first_name', true ),
             'last_name'  => (string) get_post_meta( $post_id, '_hcjm_staff_last_name',  true ),
-            'role'       => (string) get_post_meta( $post_id, '_hcjm_staff_role',        true ),
+            'role'       => $role,
             'contact'    => (string) get_post_meta( $post_id, '_hcjm_staff_contact',     true ),
             'photo_id'   => (int)    get_post_meta( $post_id, '_hcjm_staff_photo_id',    true ),
             'team_id'    => (int)    get_post_meta( $post_id, '_hcjm_staff_team_id',     true ),
@@ -98,7 +106,7 @@ class HCJM_Staff {
         return [
             __( 'Hlavní trenér', HCJM_TEXT_DOMAIN ),
             __( 'Asistent trenéra', HCJM_TEXT_DOMAIN ),
-            __( 'Vedoucí mužstva', HCJM_TEXT_DOMAIN ),
+            __( 'Vedoucí týmu', HCJM_TEXT_DOMAIN ),
             __( 'Fyzioterapeut', HCJM_TEXT_DOMAIN ),
             __( 'Lékař', HCJM_TEXT_DOMAIN ),
             __( 'Masér', HCJM_TEXT_DOMAIN ),

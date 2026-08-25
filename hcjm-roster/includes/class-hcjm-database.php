@@ -68,13 +68,12 @@ class HCJM_Database {
      * @param int    $limit   0 = unlimited
      * @return array<int,object>
      */
-    public static function get_matches( int $team_id, string $season = '', string $type = 'all', int $limit = 0 ): array {
+    public static function get_matches( int $team_id, string $season = '', string $type = 'all', int $limit = 0, string $order_override = '' ): array {
         global $wpdb;
         $table = self::table();
         $now   = current_time( 'mysql' );
 
-        $where   = [];
-        $formats = [];
+        $where = [];
 
         if ( $team_id > 0 ) {
             $where[] = $wpdb->prepare( 'team_id = %d', $team_id );
@@ -92,6 +91,10 @@ class HCJM_Database {
             $order   = 'DESC';
         } else {
             $order = 'ASC';
+        }
+
+        if ( $order_override === 'DESC' || $order_override === 'ASC' ) {
+            $order = $order_override;
         }
 
         $where_sql = $where ? ( ' WHERE ' . implode( ' AND ', $where ) ) : '';

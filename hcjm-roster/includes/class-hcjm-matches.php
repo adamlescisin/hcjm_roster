@@ -57,30 +57,22 @@ class HCJM_Matches {
     }
 
     /**
-     * Whether the home side won (used for CSS highlights).
+     * Whether HC Junior Mělník won the given match.
+     * score_home is always HCJM's score; is_home does not affect the outcome.
      *
      * @param object $match
      * @return bool|null null if no result yet
      */
-    public static function home_won( object $match ): ?bool {
+    public static function hcjm_won( object $match ): ?bool {
         if ( $match->score_home === null || $match->score_away === null ) {
             return null;
         }
-        return (int) $match->score_home > (int) $match->score_away;
-    }
-
-    /**
-     * Whether HC Junior Mělník won the given match.
-     *
-     * @param object $match
-     * @return bool|null
-     */
-    public static function hcjm_won( object $match ): ?bool {
-        $home_won = self::home_won( $match );
-        if ( $home_won === null ) {
-            return null;
+        $ours   = (int) $match->score_home;
+        $theirs = (int) $match->score_away;
+        if ( $ours === $theirs ) {
+            return null; // draw — caller treats null as draw
         }
-        return $match->is_home ? $home_won : ! $home_won;
+        return $ours > $theirs;
     }
 
     /**

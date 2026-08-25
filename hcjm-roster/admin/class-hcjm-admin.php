@@ -155,10 +155,11 @@ class HCJM_Admin {
         if ( ! $team ) {
             wp_die( esc_html__( 'Mužstvo nenalezeno.', HCJM_TEXT_DOMAIN ) );
         }
-        $slug       = get_post_meta( $team_id, '_hcjm_team_slug', true );
-        $jersey     = get_post_meta( $team_id, '_hcjm_team_jersey_numbers', true );
-        $ext_id     = get_post_meta( $team_id, '_hcjm_team_external_id', true );
-        $league_id  = get_post_meta( $team_id, '_hcjm_team_league_id', true );
+        $slug         = get_post_meta( $team_id, '_hcjm_team_slug', true );
+        $jersey       = get_post_meta( $team_id, '_hcjm_team_jersey_numbers', true );
+        $show_avatars = HCJM_Teams::show_avatars( $team_id );
+        $ext_id       = get_post_meta( $team_id, '_hcjm_team_external_id', true );
+        $league_id    = get_post_meta( $team_id, '_hcjm_team_league_id', true );
         ?>
         <div class="wrap hcjm-wrap">
             <h1><?php echo esc_html( $team->post_title ); ?> &mdash; <?php esc_html_e( 'Nastavení mužstva', HCJM_TEXT_DOMAIN ); ?></h1>
@@ -183,6 +184,12 @@ class HCJM_Admin {
                     <tr>
                         <th><?php esc_html_e( 'Zobrazovat čísla dresů', HCJM_TEXT_DOMAIN ); ?></th>
                         <td><label><input type="checkbox" name="jersey_numbers" value="1" <?php checked( $jersey, '1' ); ?>>
+                            <?php esc_html_e( 'Ano', HCJM_TEXT_DOMAIN ); ?></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Zobrazovat fotografie hráčů', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td><label><input type="checkbox" name="show_avatars" value="1" <?php checked( $show_avatars ); ?>>
                             <?php esc_html_e( 'Ano', HCJM_TEXT_DOMAIN ); ?></label>
                         </td>
                     </tr>
@@ -300,7 +307,7 @@ class HCJM_Admin {
                         <tr>
                             <?php if ( $has_jersey ) : ?><td><strong><?php echo esc_html( $m['jersey'] ); ?></strong></td><?php endif; ?>
                             <td><?php if ( $m['photo_id'] ) : ?><img src="<?php echo esc_url( wp_get_attachment_thumb_url( $m['photo_id'] ) ); ?>" class="hcjm-thumb"><?php else : ?>&mdash;<?php endif; ?></td>
-                            <td><?php echo esc_html( $m['last_name'] . ' ' . $m['first_name'] ); ?></td>
+                            <td><?php echo esc_html( $m['first_name'] . ' ' . $m['last_name'] ); ?></td>
                             <td><?php echo esc_html( $positions[ $m['position'] ] ?? $m['position'] ); ?></td>
                             <td><?php echo esc_html( $m['birth_year'] ); ?></td>
                             <td>
@@ -377,11 +384,11 @@ class HCJM_Admin {
                         </td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e( 'Jméno', HCJM_TEXT_DOMAIN ); ?></th>
+                        <th><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></th>
                         <td><input type="text" name="first_name" class="regular-text" value="<?php echo esc_attr( $m['first_name'] ); ?>" required></td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></th>
+                        <th><?php esc_html_e( 'Jméno', HCJM_TEXT_DOMAIN ); ?></th>
                         <td><input type="text" name="last_name" class="regular-text" value="<?php echo esc_attr( $m['last_name'] ); ?>" required></td>
                     </tr>
                     <tr>
@@ -1159,6 +1166,7 @@ class HCJM_Admin {
 
         update_post_meta( $team_id, '_hcjm_team_slug',          sanitize_title( $_POST['slug'] ?? '' ) );
         update_post_meta( $team_id, '_hcjm_team_jersey_numbers', isset( $_POST['jersey_numbers'] ) ? '1' : '0' );
+        update_post_meta( $team_id, '_hcjm_team_show_avatars',   isset( $_POST['show_avatars'] )   ? '1' : '0' );
         update_post_meta( $team_id, '_hcjm_team_external_id',   sanitize_text_field( $_POST['external_id'] ?? '' ) );
         update_post_meta( $team_id, '_hcjm_team_league_id',     sanitize_text_field( $_POST['league_id'] ?? '' ) );
         update_post_meta( $team_id, '_hcjm_team_import_url',    esc_url_raw( $_POST['import_url'] ?? '' ) );

@@ -214,6 +214,17 @@
   --elevation-2: 0 2px 8px rgba(0,0,0,.30);
   --elevation-3: 0 6px 20px rgba(0,0,0,.35);
   --elevation-4: 0 12px 36px rgba(0,0,0,.40);
+  /* Force dark-palette result-row colors — prevents light-mode #ecfdf5 etc.
+     from being used as a background behind white text */
+  --surface-win:  #0d2e1c;
+  --border-win:   #10b981;
+  --text-win:     #6ee7b7;
+  --surface-loss: #2a0e0e;
+  --border-loss:  #ef4444;
+  --text-loss:    #fca5a5;
+  --surface-draw: #2a2007;
+  --border-draw:  #f59e0b;
+  --text-draw:    #fcd34d;
   color: var(--text-body);
   font-family: var(--font-body);
   line-height: 1.55;
@@ -274,6 +285,74 @@
   grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
   gap: var(--sp-5);
   padding: var(--sp-1) 0;
+}
+
+/* ── Compact roster table (no avatars) ── */
+.hcjm-roster-noavatar .hcjm-roster-table-wrap {
+  overflow-x: auto;
+  background: #1c2130;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 4px 16px rgba(0,0,0,.30);
+}
+.hcjm-roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: #1c2130;
+}
+.hcjm-roster-table thead tr {
+  border-bottom: 2px solid rgba(255,255,255,.12) !important;
+}
+.hcjm-roster-table th {
+  padding: 10px 14px !important;
+  text-align: left !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .05em !important;
+  text-transform: uppercase !important;
+  color: rgba(255,255,255,.40) !important;
+  background: #1c2130 !important;
+  white-space: nowrap;
+}
+.hcjm-roster-table tbody .hcjm-rt-row {
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  transition: background .15s;
+}
+.hcjm-roster-table tbody .hcjm-rt-row:hover {
+  background: rgba(255,255,255,.04) !important;
+}
+.hcjm-roster-table td {
+  padding: 10px 14px !important;
+  vertical-align: middle !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.85) !important;
+}
+.hcjm-rt-jersey {
+  width: 48px;
+  text-align: center !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,.7) !important;
+  font-size: 1rem !important;
+}
+/* Override card-mode block display — names must be inline inside the table */
+.hcjm-rt-name .hcjm-player-firstname {
+  display: inline !important;
+  font-weight: 700 !important;
+  font-size: inherit !important;
+  color: #ffffff !important;
+  margin-right: 5px;
+}
+.hcjm-rt-name .hcjm-player-lastname {
+  display: inline !important;
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  color: rgba(255,255,255,.75) !important;
+}
+.hcjm-rt-year {
+  color: rgba(255,255,255,.45) !important;
+  white-space: nowrap;
+  font-size: 0.82rem !important;
 }
 .hcjm-staff-cards {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -846,15 +925,22 @@
   min-width: 0;
   font-size: 0.82rem;
 }
-/* Each team: logo stacked above name */
+/* Each team: logo + name side-by-side on desktop, stacked on mobile */
 .hcjm-sch-team-block {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 4px;
-  text-align: center;
+  gap: 8px;
   min-width: 0;
-  max-width: 100px;
+}
+@media (max-width: 640px) {
+  .hcjm-sch-team-block {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    max-width: 80px;
+  }
 }
 .hcjm-sch-logo-wrap {
   flex-shrink: 0;
@@ -1289,6 +1375,22 @@
 .hcjm .hcjm-match-team            { color: #ffffff; }
 .hcjm .hcjm-match-vs              { color: rgba(255,255,255,.40); }
 .hcjm .hcjm-score                 { color: #ffffff; }
+/* Result rows: keep text legible against the dark win/loss/draw backgrounds */
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-date,
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-date strong,
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-team,
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-score  { color: #6ee7b7; }
+.hcjm .hcjm-match-row.hcjm-win  .hcjm-match-vs { color: rgba(110,231,183,.40); }
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-date,
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-date strong,
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-team,
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-score  { color: #fca5a5; }
+.hcjm .hcjm-match-row.hcjm-loss .hcjm-match-vs { color: rgba(252,165,165,.40); }
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-date,
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-date strong,
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-team,
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-score  { color: #fcd34d; }
+.hcjm .hcjm-match-row.hcjm-draw .hcjm-match-vs { color: rgba(252,211,77,.40); }
 
 /* Match schedule shortcode */
 .hcjm .hcjm-sch-datenum   { color: #ffffff; }
@@ -1323,12 +1425,12 @@
   color: rgba(255,255,255,.78);
 }
 .hcjm .hcjm-sch-pill:hover {
-  border-color: #2e73d4;
-  color: #8db4e8;
+  border-color: #d9000d;
+  color: #ff6b6b;
 }
 .hcjm .hcjm-sch-pill.active {
-  background: #154999;
-  border-color: #154999;
+  background: #d9000d;
+  border-color: #d9000d;
   color: #ffffff;
 }
 
@@ -1350,6 +1452,20 @@
 .hcjm .hcjm-nm-dot.active  { background: #ffffff; }
 
 /* Friendly / practice match badge */
+.hcjm-match-cat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  background: rgba(217,0,13,.18);
+  color: #ff6b6b;
+  border: 1px solid rgba(217,0,13,.35);
+  vertical-align: middle;
+  margin-right: 4px;
+  white-space: nowrap;
+}
 .hcjm-friendly-badge,
 .hcjm-sch-friendly-badge {
   display: inline-block;
