@@ -84,7 +84,9 @@ class HCJM_Database {
         }
 
         if ( $type === 'upcoming' ) {
-            $where[] = $wpdb->prepare( "(match_date >= %s OR status = 'planned')", $now );
+            // Include: future-dated matches OR planned matches with no date yet.
+            // Exclude: planned matches whose date has already passed (stale entries).
+            $where[] = $wpdb->prepare( "(match_date >= %s OR (status = 'planned' AND match_date IS NULL))", $now );
             $order   = 'ASC';
         } elseif ( $type === 'past' ) {
             $where[] = $wpdb->prepare( "match_date < %s AND status = 'played'", $now );
@@ -186,7 +188,7 @@ class HCJM_Database {
         $where_parts     = [ 'team_id IN (' . $id_placeholders . ')' ];
         $prepare_values  = $team_ids;
 
-        $where_parts[]    = "(match_date >= %s OR status = 'planned')";
+        $where_parts[]    = "(match_date >= %s OR (status = 'planned' AND match_date IS NULL))";
         $prepare_values[] = $now;
 
         if ( $season ) {
