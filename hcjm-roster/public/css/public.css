@@ -1157,6 +1157,23 @@
   padding-bottom: var(--sp-4);
 }
 
+.hcjm-nm-no-matches {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+.hcjm-nm-no-matches-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
 /* Navigation */
 .hcjm-nm-nav {
   display: flex;
@@ -1324,6 +1341,7 @@
 .hcjm .hcjm-nm-detail-btn:hover { background: rgba(255,255,255,.10); color: #ffffff; }
 .hcjm .hcjm-nm-cd-label    { color: rgba(255,255,255,.55); }
 .hcjm .hcjm-nm-started     { color: rgba(255,255,255,.55); }
+.hcjm .hcjm-nm-no-matches  { color: rgba(255,255,255,.55); }
 .hcjm .hcjm-nm-prev,
 .hcjm .hcjm-nm-next        { color: rgba(255,255,255,.55); border-color: rgba(255,255,255,.18); }
 .hcjm .hcjm-nm-prev:hover,

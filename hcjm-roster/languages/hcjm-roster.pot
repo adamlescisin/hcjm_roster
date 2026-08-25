@@ -398,6 +398,9 @@ msgstr ""
 msgid "Žádné výsledky."
 msgstr ""
 
+msgid "Další zápasy plánujeme"
+msgstr ""
+
 msgid "Rok nar.:"
 msgstr ""
 
