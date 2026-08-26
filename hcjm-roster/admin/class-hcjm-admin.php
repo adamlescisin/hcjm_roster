@@ -721,7 +721,14 @@ class HCJM_Admin {
                     foreach ( $matches as $match ) :
                     ?>
                         <tr>
-                            <td><?php echo esc_html( HCJM_Matches::format_date( $match ) ); ?></td>
+                            <td><?php
+                                echo esc_html( HCJM_Matches::format_date( $match ) );
+                                $admin_ts = HCJM_Matches::get_match_timestamp( $match );
+                                $admin_time = $admin_ts ? (string) wp_date( 'H:i', $admin_ts ) : '';
+                                if ( $admin_time && $admin_time !== '00:00' ) {
+                                    echo ' <span style="color:#666;font-size:12px">' . esc_html( $admin_time ) . '</span>';
+                                }
+                            ?></td>
                             <td><?php echo esc_html( $team_map[ $match->team_id ] ?? '–' ); ?></td>
                             <td><?php echo $match->is_home ? '<span class="hcjm-badge hcjm-badge-home">D</span>' : '<span class="hcjm-badge hcjm-badge-away">V</span>'; ?></td>
                             <td>
