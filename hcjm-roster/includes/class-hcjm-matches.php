@@ -83,6 +83,29 @@ class HCJM_Matches {
     }
 
     /**
+     * Get a correct UTC timestamp for a match's stored local date/time.
+     *
+     * match_date is stored as Czech local time. Using strtotime() treats it as
+     * UTC and then wp_date() adds the Prague offset (+2h), causing a 2-hour
+     * display shift. DateTimeImmutable + wp_timezone() anchors the stored value
+     * to the correct timezone before extracting the Unix timestamp.
+     *
+     * @param object $match
+     * @return int 0 if no date or parse failure
+     */
+    public static function get_match_timestamp( object $match ): int {
+        if ( ! $match->match_date ) {
+            return 0;
+        }
+        try {
+            $dt = new DateTimeImmutable( $match->match_date, wp_timezone() );
+            return $dt->getTimestamp();
+        } catch ( Exception $e ) {
+            return 0;
+        }
+    }
+
+    /**
      * Format the match date for display.
      *
      * @param object $match
@@ -92,7 +115,7 @@ class HCJM_Matches {
         if ( ! $match->match_date ) {
             return '–';
         }
-        $ts = strtotime( $match->match_date );
+        $ts = self::get_match_timestamp( $match );
         if ( ! $ts ) {
             return esc_html( $match->match_date );
         }
