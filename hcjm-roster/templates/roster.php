@@ -50,7 +50,7 @@ $uid                = 'hcjm-roster-' . wp_generate_password( 6, false, false );
                         $m         = HCJM_Players::get_meta( $player->ID );
                         $pos_label = $positions[ $m['position'] ] ?? $m['position'];
                         $jersey_sort = ( $m['jersey'] !== '' ) ? (int) $m['jersey'] : 9999;
-                        $last_sort   = mb_strtolower( $m['last_name'] );
+                        $last_sort   = mb_strtolower( $m['first_name'] );
                     ?>
                     <tr class="hcjm-rt-row"
                         data-position="<?php echo esc_attr( $m['position'] ); ?>"
@@ -81,7 +81,7 @@ $uid                = 'hcjm-roster-' . wp_generate_password( 6, false, false );
                 $pos_label = $positions[ $m['position'] ] ?? $m['position'];
                 $initials  = mb_substr( $m['last_name'], 0, 1 ) . mb_substr( $m['first_name'], 0, 1 );
                 $jersey_sort = ( $m['jersey'] !== '' ) ? (int) $m['jersey'] : 9999;
-                $last_sort   = mb_strtolower( $m['last_name'] );
+                $last_sort   = mb_strtolower( $m['first_name'] );
             ?>
                 <div class="hcjm-card hcjm-player-card"
                      data-position="<?php echo esc_attr( $m['position'] ); ?>"
