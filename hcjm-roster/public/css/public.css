@@ -279,6 +279,46 @@
   line-height: 1.6;
 }
 
+/* ── Roster sort toggle ───────────────────────────────────────── */
+.hcjm-roster-sort {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.hcjm-sort-label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: .65;
+  margin-right: 2px;
+}
+.hcjm-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: var(--radius-full, 999px);
+  border: 1px solid rgba(0,0,0,.2);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+  line-height: 1;
+  font-family: inherit;
+}
+.hcjm-sort-btn:hover { border-color: var(--surface-accent); color: var(--surface-accent); }
+.hcjm-sort-btn.active { background: var(--surface-accent); border-color: var(--surface-accent); color: #fff; }
+
+/* Dark override */
+.hcjm .hcjm-sort-btn {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.78);
+}
+.hcjm .hcjm-sort-btn:hover { border-color: #d9000d; color: #ff6b6b; }
+.hcjm .hcjm-sort-btn.active { background: #d9000d; border-color: #d9000d; color: #fff; }
+
 /* ── Card grid — matches DS Card layout ──────────────────────── */
 .hcjm-cards {
   display: grid;
