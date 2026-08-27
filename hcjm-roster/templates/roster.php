@@ -28,8 +28,8 @@ $uid                = 'hcjm-roster-' . wp_generate_password( 6, false, false );
     <?php if ( $has_jersey ) : ?>
     <div class="hcjm-roster-sort" role="group" aria-label="<?php esc_attr_e( 'Řazení', HCJM_TEXT_DOMAIN ); ?>">
         <span class="hcjm-sort-label"><?php esc_html_e( 'Řazení:', HCJM_TEXT_DOMAIN ); ?></span>
-        <button class="hcjm-sort-btn active" data-sort="jersey"><?php esc_html_e( 'Číslo dresu', HCJM_TEXT_DOMAIN ); ?></button>
-        <button class="hcjm-sort-btn" data-sort="last"><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></button>
+        <button class="hcjm-filter-btn hcjm-sort-btn active" data-sort="jersey"><?php esc_html_e( 'Číslo dresu', HCJM_TEXT_DOMAIN ); ?></button>
+        <button class="hcjm-filter-btn hcjm-sort-btn" data-sort="last"><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></button>
     </div>
     <?php endif; ?>
 
