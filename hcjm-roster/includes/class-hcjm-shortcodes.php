@@ -233,10 +233,19 @@ class HCJM_Shortcodes {
         $all_teams = HCJM_Teams::get_all();
 
         // Filter to requested slugs when the 'teams' attribute is provided.
+        // Slugs are stored in the _hcjm_team_slug meta (same as HCJM_Teams::get_by_slug()),
+        // NOT in post_name, so we resolve each slug via get_by_slug().
         if ( ! empty( $atts['teams'] ) ) {
-            $allowed_slugs = array_map( 'sanitize_title', array_map( 'trim', explode( ',', $atts['teams'] ) ) );
-            $all_teams     = array_values( array_filter( $all_teams, static function ( $t ) use ( $allowed_slugs ): bool {
-                return in_array( $t->post_name, $allowed_slugs, true );
+            $allowed_slugs  = array_map( 'sanitize_title', array_map( 'trim', explode( ',', $atts['teams'] ) ) );
+            $allowed_ids    = [];
+            foreach ( $allowed_slugs as $slug ) {
+                $t = HCJM_Teams::get_by_slug( $slug );
+                if ( $t ) {
+                    $allowed_ids[] = $t->ID;
+                }
+            }
+            $all_teams = array_values( array_filter( $all_teams, static function ( $t ) use ( $allowed_ids ): bool {
+                return in_array( $t->ID, $allowed_ids, true );
             } ) );
         }
 
