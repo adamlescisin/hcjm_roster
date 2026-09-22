@@ -68,6 +68,62 @@ class HCJM_Database {
      * @param int    $limit   0 = unlimited
      * @return array<int,object>
      */
+    /**
+     * Get matches for multiple teams. Behaves like get_matches() but accepts an array of IDs.
+     *
+     * @param int[]  $team_ids  Non-empty array of team IDs.
+     * @param string $season
+     * @param string $type      'upcoming'|'past'|'all'
+     * @param int    $limit     0 = unlimited
+     * @param string $order_override
+     * @return array<int,object>
+     */
+    public static function get_matches_for_teams( array $team_ids, string $season = '', string $type = 'all', int $limit = 0, string $order_override = '' ): array {
+        if ( empty( $team_ids ) ) {
+            return [];
+        }
+        global $wpdb;
+        $table = self::table();
+        $now   = current_time( 'mysql' );
+
+        $placeholders = implode( ',', array_fill( 0, count( $team_ids ), '%d' ) );
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $where = [ $wpdb->prepare( 'team_id IN (' . $placeholders . ')', ...$team_ids ) ];
+
+        if ( $season ) {
+            $where[] = $wpdb->prepare( 'season = %s', $season );
+        }
+
+        if ( $type === 'upcoming' ) {
+            $where[] = $wpdb->prepare( "(match_date >= %s OR (status = 'planned' AND match_date IS NULL))", $now );
+            $order   = 'ASC';
+        } elseif ( $type === 'past' ) {
+            $where[] = $wpdb->prepare( "match_date < %s AND status = 'played'", $now );
+            $order   = 'DESC';
+        } else {
+            $order = 'ASC';
+        }
+
+        if ( $order_override === 'DESC' || $order_override === 'ASC' ) {
+            $order = $order_override;
+        }
+
+        $sql = 'SELECT * FROM ' . $table . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY match_date ' . $order;
+
+        if ( $limit > 0 ) {
+            $sql .= $wpdb->prepare( ' LIMIT %d', $limit );
+        }
+
+        return $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+    }
+
+    /**
+     * @param int    $team_id
+     * @param string $season
+     * @param string $type    'upcoming'|'past'|'all'
+     * @param int    $limit   0 = unlimited
+     * @return array<int,object>
+     */
     public static function get_matches( int $team_id, string $season = '', string $type = 'all', int $limit = 0, string $order_override = '' ): array {
         global $wpdb;
         $table = self::table();
