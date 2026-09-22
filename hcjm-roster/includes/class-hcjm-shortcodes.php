@@ -210,6 +210,8 @@ class HCJM_Shortcodes {
      * Attributes:
      *   limit  int     Max matches to show per team category (default 10, 0 = unlimited)
      *   season string  e.g. "2025-2026" (defaults to current season)
+     *   teams  string  Comma-separated team slugs to include, e.g. "muzi-a,dorost"
+     *                  (default empty = all teams)
      *
      * @param array<string,string>|string $atts
      * @return string
@@ -219,6 +221,7 @@ class HCJM_Shortcodes {
             [
                 'limit'  => '10',
                 'season' => HCJM_Matches::current_season(),
+                'teams'  => '',
             ],
             $atts,
             'hcjm_match_schedule'
@@ -228,6 +231,15 @@ class HCJM_Shortcodes {
         $season   = sanitize_text_field( $atts['season'] );
 
         $all_teams = HCJM_Teams::get_all();
+
+        // Filter to requested slugs when the 'teams' attribute is provided.
+        if ( ! empty( $atts['teams'] ) ) {
+            $allowed_slugs = array_map( 'sanitize_title', array_map( 'trim', explode( ',', $atts['teams'] ) ) );
+            $all_teams     = array_values( array_filter( $all_teams, static function ( $t ) use ( $allowed_slugs ): bool {
+                return in_array( $t->post_name, $allowed_slugs, true );
+            } ) );
+        }
+
         $team_ids  = array_map( static fn( $t ) => $t->ID, $all_teams );
 
         $matches = HCJM_Database::get_upcoming_multi( $team_ids, $season, $per_team );
