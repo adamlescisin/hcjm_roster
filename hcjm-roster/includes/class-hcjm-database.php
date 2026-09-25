@@ -96,6 +96,7 @@ class HCJM_Database {
 
         if ( $type === 'upcoming' ) {
             $where[] = $wpdb->prepare( "(match_date >= %s OR (status = 'planned' AND match_date IS NULL))", $now );
+            $where[] = "status != 'cancelled'";
             $order   = 'ASC';
         } elseif ( $type === 'past' ) {
             $where[] = $wpdb->prepare( "match_date < %s AND status = 'played'", $now );
@@ -141,8 +142,9 @@ class HCJM_Database {
 
         if ( $type === 'upcoming' ) {
             // Include: future-dated matches OR planned matches with no date yet.
-            // Exclude: planned matches whose date has already passed (stale entries).
+            // Exclude: planned matches whose date has already passed, and cancelled matches.
             $where[] = $wpdb->prepare( "(match_date >= %s OR (status = 'planned' AND match_date IS NULL))", $now );
+            $where[] = "status != 'cancelled'";
             $order   = 'ASC';
         } elseif ( $type === 'past' ) {
             $where[] = $wpdb->prepare( "match_date < %s AND status = 'played'", $now );
@@ -246,6 +248,7 @@ class HCJM_Database {
 
         $where_parts[]    = "(match_date >= %s OR (status = 'planned' AND match_date IS NULL))";
         $prepare_values[] = $now;
+        $where_parts[]    = "status != 'cancelled'";
 
         if ( $season ) {
             $where_parts[]    = 'season = %s';
