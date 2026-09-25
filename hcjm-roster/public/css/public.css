@@ -741,6 +741,12 @@
   color: var(--text-muted);
   letter-spacing: 0.02em;
 }
+.hcjm-cancelled {
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-medium);
+  color: #e05252;
+  letter-spacing: 0.02em;
+}
 
 /* ── Position filter bar (JS-injected) ───────────────────────── */
 .hcjm-filter-bar {
