@@ -218,8 +218,17 @@ class HCJM_Scraper {
             $opponent = $is_home ? $away_name : $home_name;
         }
 
-        $score_home  = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
-        $score_away  = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
+        // API returns homeScore/awayScore as home-team-first (website convention).
+        // DB convention: score_home = HCJM goals, score_away = opponent goals.
+        $raw_home_goals = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
+        $raw_away_goals = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
+        if ( $raw_home_goals !== null && $raw_away_goals !== null ) {
+            $score_home = $is_home ? $raw_home_goals : $raw_away_goals;
+            $score_away = $is_home ? $raw_away_goals : $raw_home_goals;
+        } else {
+            $score_home = null;
+            $score_away = null;
+        }
         $status_raw  = (string) ( $item['status'] ?? $item['state'] ?? $item['matchState'] ?? '' );
         if ( $score_home !== null && $score_away !== null ) {
             $status = 'played';
@@ -406,9 +415,17 @@ class HCJM_Scraper {
         $status     = 'planned';
 
         if ( $status_raw && preg_match( '/(\d+)\s*:\s*(\d+)/', $status_raw, $sm ) ) {
-            $score_home = (int) $sm[1];
-            $score_away = (int) $sm[2];
-            $status     = 'played';
+            // Website always shows HOME:AWAY goals.
+            // DB convention: score_home = HCJM goals, score_away = opponent goals.
+            // Swap when we are the away side.
+            if ( $is_home ) {
+                $score_home = (int) $sm[1];
+                $score_away = (int) $sm[2];
+            } else {
+                $score_home = (int) $sm[2]; // our goals (away)
+                $score_away = (int) $sm[1]; // opponent goals (home)
+            }
+            $status = 'played';
         } elseif ( self::is_cancelled_status( $status_raw ) ) {
             $status = 'cancelled';
         }
