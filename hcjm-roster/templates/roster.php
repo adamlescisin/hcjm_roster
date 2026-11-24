@@ -61,12 +61,14 @@ $show_avatars       = $show_avatars ?? true;
         <div class="hcjm-cards">
             <?php foreach ( $players as $player ) :
                 $m         = HCJM_Players::get_meta( $player->ID );
-                $photo_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'medium' ) : $placeholder_global;
+                $photo_url      = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'hcjm_player' ) : $placeholder_global;
+                $photo_full_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'full' ) : '';
                 $pos_label = $positions[ $m['position'] ] ?? $m['position'];
                 $initials  = mb_substr( $m['last_name'], 0, 1 ) . mb_substr( $m['first_name'], 0, 1 );
             ?>
                 <div class="hcjm-card hcjm-player-card" data-position="<?php echo esc_attr( $m['position'] ); ?>">
-                    <div class="hcjm-card-photo">
+                    <div class="hcjm-card-photo<?php echo $photo_full_url ? ' hcjm-photo-clickable' : ''; ?>"
+                         <?php if ( $photo_full_url ) : ?>data-full="<?php echo esc_url( $photo_full_url ); ?>"<?php endif; ?>>
                         <?php if ( $photo_url ) : ?>
                             <img src="<?php echo esc_url( $photo_url ); ?>"
                                  alt="<?php echo esc_attr( $m['last_name'] . ' ' . $m['first_name'] ); ?>"
@@ -102,3 +104,47 @@ $show_avatars       = $show_avatars ?? true;
         </div>
     <?php endif; ?>
 </div>
+
+<div id="hcjm-photo-modal" class="hcjm-photo-modal-overlay" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Fotografie hráče', HCJM_TEXT_DOMAIN ); ?>">
+    <button class="hcjm-photo-modal-close" aria-label="<?php esc_attr_e( 'Zavřít', HCJM_TEXT_DOMAIN ); ?>">&times;</button>
+    <img class="hcjm-photo-modal-img" src="" alt="">
+</div>
+<script>
+(function () {
+    var overlay  = document.getElementById( 'hcjm-photo-modal' );
+    var modalImg = overlay.querySelector( '.hcjm-photo-modal-img' );
+
+    function open( src, alt ) {
+        modalImg.src = src;
+        modalImg.alt = alt || '';
+        overlay.classList.add( 'is-open' );
+        document.body.style.overflow = 'hidden';
+    }
+    function close() {
+        overlay.classList.remove( 'is-open' );
+        document.body.style.overflow = '';
+        modalImg.src = '';
+    }
+
+    document.querySelectorAll( '.hcjm-card-photo.hcjm-photo-clickable' ).forEach( function ( card ) {
+        card.addEventListener( 'click', function () {
+            var full = card.dataset.full;
+            if ( ! full ) return;
+            var alt = card.querySelector( 'img' ) ? card.querySelector( 'img' ).alt : '';
+            open( full, alt );
+        } );
+    } );
+
+    overlay.addEventListener( 'click', function ( e ) {
+        if ( e.target === overlay || e.target.classList.contains( 'hcjm-photo-modal-close' ) ) {
+            close();
+        }
+    } );
+
+    document.addEventListener( 'keydown', function ( e ) {
+        if ( e.key === 'Escape' && overlay.classList.contains( 'is-open' ) ) {
+            close();
+        }
+    } );
+})();
+</script>

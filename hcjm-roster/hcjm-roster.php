@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'HCJM_VERSION', '2.3.7' );
+define( 'HCJM_VERSION', '2.5.1' );
 define( 'HCJM_PLUGIN_FILE', __FILE__ );
 define( 'HCJM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCJM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -116,3 +116,7 @@ function hcjm_load_textdomain(): void {
 }
 
 hcjm_run();
+
+add_action( 'after_setup_theme', static function (): void {
+    add_image_size( 'hcjm_player', 600, 900, false );
+} );
