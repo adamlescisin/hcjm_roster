@@ -33,6 +33,9 @@ class HCJM_Public {
             wp_add_inline_style( 'hcjm-public', $css );
         }
 
+        $zoom = max( 1.0, min( 2.5, (float) get_option( 'hcjm_photo_zoom', 1.2 ) ) );
+        wp_add_inline_style( 'hcjm-public', sprintf( '.hcjm { --hcjm-photo-zoom: %.2f; }', $zoom ) );
+
         $font_key = $styles['font_family'] ?? '';
         $font_url = $font_key ? HCJM_Styles::get_font_url( $font_key ) : '';
         if ( $font_url ) {

@@ -57,6 +57,10 @@ class HCJM_Admin {
         register_setting( 'hcjm_settings_group', 'hcjm_current_season',      'sanitize_text_field' );
         register_setting( 'hcjm_settings_group', 'hcjm_cron_interval',       'sanitize_text_field' );
         register_setting( 'hcjm_settings_group', 'hcjm_placeholder_avatar',  'absint' );
+        register_setting( 'hcjm_settings_group', 'hcjm_photo_zoom', static function ( $v ): float {
+            $v = (float) $v;
+            return max( 1.0, min( 2.5, $v ) );
+        } );
     }
 
     // -------------------------------------------------------------------------
@@ -1106,6 +1110,19 @@ class HCJM_Admin {
                                 </button>
                             <?php endif; ?>
                             <p class="description"><?php esc_html_e( 'Zobrazí se místo iniciál tam, kde hráč nemá vlastní fotku.', HCJM_TEXT_DOMAIN ); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e( 'Přiblížení fotky hráče', HCJM_TEXT_DOMAIN ); ?></th>
+                        <td>
+                            <?php $zoom_val = number_format( (float) get_option( 'hcjm_photo_zoom', 1.2 ), 2, '.', '' ); ?>
+                            <input type="range" name="hcjm_photo_zoom" id="hcjm_photo_zoom"
+                                min="1.00" max="2.50" step="0.05"
+                                value="<?php echo esc_attr( $zoom_val ); ?>"
+                                style="width:200px;vertical-align:middle"
+                                oninput="document.getElementById('hcjm_zoom_display').textContent=parseFloat(this.value).toFixed(2)+'×'">
+                            <span id="hcjm_zoom_display" style="margin-left:8px;font-weight:600"><?php echo esc_html( $zoom_val ); ?>×</span>
+                            <p class="description"><?php esc_html_e( '1.00 = žádné přiblížení, 1.20 = výchozí, 2.50 = maximální. Ovlivní karty hráčů na webu.', HCJM_TEXT_DOMAIN ); ?></p>
                         </td>
                     </tr>
                 </table>

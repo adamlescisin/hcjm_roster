@@ -388,10 +388,12 @@
   object-fit: cover;
   object-position: top center;
   display: block;
+  transform: scale(var(--hcjm-photo-zoom, 1.2));
+  transform-origin: top center;
   transition: transform 0.4s cubic-bezier(.4,0,.2,1);
 }
 .hcjm-card:hover .hcjm-card-photo img {
-  transform: scale(1.04);
+  transform: scale(calc(var(--hcjm-photo-zoom, 1.2) * 1.04));
 }
 .hcjm-card-photo.hcjm-photo-clickable {
   cursor: zoom-in;
