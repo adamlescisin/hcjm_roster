@@ -30,7 +30,7 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
                 $is_played = $match->status === 'played';
 
                 // Day-of-week prefix
-                $ts         = $match->match_date ? strtotime( $match->match_date ) : 0;
+                $ts         = HCJM_Matches::get_match_timestamp( $match );
                 $day_abbr   = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
                 $time_str   = $ts ? (string) wp_date( 'H:i', $ts ) : '';
 

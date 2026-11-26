@@ -81,13 +81,27 @@ class HCJM_Matches {
      * @param object $match
      * @return string
      */
-    public static function format_date( object $match ): string {
+    /**
+     * Parse match_date (stored as local Czech time) into a Unix timestamp.
+     * Using DateTimeImmutable + wp_timezone() avoids the +1h shift that
+     * strtotime() causes when the server runs in UTC.
+     */
+    public static function get_match_timestamp( object $match ): int {
         if ( ! $match->match_date ) {
-            return '–';
+            return 0;
         }
-        $ts = strtotime( $match->match_date );
+        try {
+            $dt = new DateTimeImmutable( $match->match_date, wp_timezone() );
+            return $dt->getTimestamp();
+        } catch ( \Exception $e ) {
+            return 0;
+        }
+    }
+
+    public static function format_date( object $match ): string {
+        $ts = self::get_match_timestamp( $match );
         if ( ! $ts ) {
-            return esc_html( $match->match_date );
+            return $match->match_date ? esc_html( $match->match_date ) : '–';
         }
         return esc_html( (string) wp_date( 'j. n. Y', $ts ) );
     }

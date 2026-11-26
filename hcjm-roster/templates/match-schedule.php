@@ -46,7 +46,7 @@ $club_logo_url = $club_logo_id ? wp_get_attachment_image_url( $club_logo_id, 'th
 
     <div class="hcjm-schedule-list">
         <?php foreach ( $matches as $match ) :
-            $ts         = $match->match_date ? strtotime( $match->match_date ) : 0;
+            $ts         = HCJM_Matches::get_match_timestamp( $match );
             $day_abbr   = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
             $date_str   = $ts ? (string) wp_date( 'j. n. Y', $ts ) : '';
             $time_str   = ( $ts && wp_date( 'H:i', $ts ) !== '00:00' ) ? (string) wp_date( 'H:i', $ts ) : '';
