@@ -218,9 +218,18 @@ class HCJM_Scraper {
             $opponent = $is_home ? $away_name : $home_name;
         }
 
-        $score_home = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
-        $score_away = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
-        $status     = ( $score_home !== null && $score_away !== null ) ? 'played' : 'planned';
+        $raw_home = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
+        $raw_away = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
+        // DB convention: score_home = HCJM goals, score_away = opponent goals.
+        // Website shows HOME:AWAY, so swap when HCJM is the away team.
+        if ( $raw_home !== null && $raw_away !== null ) {
+            $score_home = $is_home ? $raw_home : $raw_away;
+            $score_away = $is_home ? $raw_away : $raw_home;
+        } else {
+            $score_home = null;
+            $score_away = null;
+        }
+        $status = ( $score_home !== null && $score_away !== null ) ? 'played' : 'planned';
         $ext_id     = sanitize_text_field( (string) ( $item['id'] ?? $item['externalId'] ?? '' ) );
 
         return [
@@ -398,8 +407,9 @@ class HCJM_Scraper {
         $status     = 'planned';
 
         if ( $status_raw && preg_match( '/(\d+)\s*:\s*(\d+)/', $status_raw, $sm ) ) {
-            $score_home = (int) $sm[1];
-            $score_away = (int) $sm[2];
+            // Website shows HOME:AWAY; swap when HCJM is the away team.
+            $score_home = $is_home ? (int) $sm[1] : (int) $sm[2];
+            $score_away = $is_home ? (int) $sm[2] : (int) $sm[1];
             $status     = 'played';
         }
 
