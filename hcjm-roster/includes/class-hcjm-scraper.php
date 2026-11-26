@@ -218,18 +218,25 @@ class HCJM_Scraper {
             $opponent = $is_home ? $away_name : $home_name;
         }
 
-        $raw_home = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
-        $raw_away = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
+        // API returns homeScore/awayScore as home-team-first (website convention).
         // DB convention: score_home = HCJM goals, score_away = opponent goals.
-        // Website shows HOME:AWAY, so swap when HCJM is the away team.
-        if ( $raw_home !== null && $raw_away !== null ) {
-            $score_home = $is_home ? $raw_home : $raw_away;
-            $score_away = $is_home ? $raw_away : $raw_home;
+        $raw_home_goals = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
+        $raw_away_goals = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
+        if ( $raw_home_goals !== null && $raw_away_goals !== null ) {
+            $score_home = $is_home ? $raw_home_goals : $raw_away_goals;
+            $score_away = $is_home ? $raw_away_goals : $raw_home_goals;
         } else {
             $score_home = null;
             $score_away = null;
         }
-        $status = ( $score_home !== null && $score_away !== null ) ? 'played' : 'planned';
+        $status_raw  = (string) ( $item['status'] ?? $item['state'] ?? $item['matchState'] ?? '' );
+        if ( $score_home !== null && $score_away !== null ) {
+            $status = 'played';
+        } elseif ( self::is_cancelled_status( $status_raw ) ) {
+            $status = 'cancelled';
+        } else {
+            $status = 'planned';
+        }
         $ext_id     = sanitize_text_field( (string) ( $item['id'] ?? $item['externalId'] ?? '' ) );
 
         return [
@@ -401,6 +408,7 @@ class HCJM_Scraper {
 
         // Status + score from "Stav" column
         // "Připraveno" / "Nový" / "Schváleno" → planned
+        // "Nehraje se" / "Zrušen" / "Odložen" → cancelled
         // "X:Y" pattern → played
         $score_home = null;
         $score_away = null;
@@ -494,6 +502,24 @@ class HCJM_Scraper {
         return strpos( $lower, 'mělník' ) !== false
             || strpos( $lower, 'melnik' ) !== false
             || strpos( $lower, 'junior' ) !== false;
+    }
+
+    /**
+     * Whether a raw status string from ceskyhokej.cz means the match is cancelled.
+     * Covers: "Nehraje se", "Zrušen", "Odložen", "cancelled", "canceled", etc.
+     */
+    private static function is_cancelled_status( string $raw ): bool {
+        $lower = mb_strtolower( trim( $raw ) );
+        return $lower !== ''
+            && (
+                strpos( $lower, 'nehraje' ) !== false
+                || strpos( $lower, 'zrušen' ) !== false
+                || strpos( $lower, 'zrusen' ) !== false
+                || strpos( $lower, 'odložen' ) !== false
+                || strpos( $lower, 'odlozen' ) !== false
+                || strpos( $lower, 'cancel' ) !== false
+                || strpos( $lower, 'postponed' ) !== false
+            );
     }
 
     /**

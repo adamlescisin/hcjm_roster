@@ -725,7 +725,14 @@ class HCJM_Admin {
                     foreach ( $matches as $match ) :
                     ?>
                         <tr>
-                            <td><?php echo esc_html( HCJM_Matches::format_date( $match ) ); ?></td>
+                            <td><?php
+                                echo esc_html( HCJM_Matches::format_date( $match ) );
+                                $admin_ts = HCJM_Matches::get_match_timestamp( $match );
+                                $admin_time = $admin_ts ? (string) wp_date( 'H:i', $admin_ts ) : '';
+                                if ( $admin_time && $admin_time !== '00:00' ) {
+                                    echo ' <span style="color:#666;font-size:12px">' . esc_html( $admin_time ) . '</span>';
+                                }
+                            ?></td>
                             <td><?php echo esc_html( $team_map[ $match->team_id ] ?? '–' ); ?></td>
                             <td><?php echo $match->is_home ? '<span class="hcjm-badge hcjm-badge-home">D</span>' : '<span class="hcjm-badge hcjm-badge-away">V</span>'; ?></td>
                             <td>
@@ -738,6 +745,8 @@ class HCJM_Admin {
                             <td>
                                 <?php if ( $match->status === 'played' ) : ?>
                                     <span class="hcjm-badge hcjm-badge-played"><?php esc_html_e( 'Odehráno', HCJM_TEXT_DOMAIN ); ?></span>
+                                <?php elseif ( $match->status === 'cancelled' ) : ?>
+                                    <span class="hcjm-badge hcjm-badge-cancelled"><?php esc_html_e( 'Zrušeno', HCJM_TEXT_DOMAIN ); ?></span>
                                 <?php else : ?>
                                     <span class="hcjm-badge hcjm-badge-planned"><?php esc_html_e( 'Plánováno', HCJM_TEXT_DOMAIN ); ?></span>
                                 <?php endif; ?>
@@ -1433,7 +1442,7 @@ class HCJM_Admin {
         $time_part   = sanitize_text_field( $_POST['match_date_time'] ?? '' );
         $is_home     = absint( $_POST['is_home'] ?? 1 );
         $is_friendly = isset( $_POST['is_friendly'] ) ? 1 : 0;
-        $status      = in_array( $_POST['status'] ?? '', [ 'planned', 'played' ], true ) ? $_POST['status'] : 'planned';
+        $status      = in_array( $_POST['status'] ?? '', [ 'planned', 'played', 'cancelled' ], true ) ? $_POST['status'] : 'planned';
 
         // Opponent: the form POSTs "opponent" — could be the manual text field or the hidden field
         // (both are named "opponent"; the last one in form order wins when both are present).
@@ -1444,6 +1453,11 @@ class HCJM_Admin {
         $score_away_raw = $_POST['score_away'] ?? '';
         $score_home     = ( $status === 'played' && $score_home_raw !== '' ) ? absint( $score_home_raw ) : null;
         $score_away     = ( $status === 'played' && $score_away_raw !== '' ) ? absint( $score_away_raw ) : null;
+        // Cancelled matches have no score
+        if ( $status === 'cancelled' ) {
+            $score_home = null;
+            $score_away = null;
+        }
 
         $match_date = $date_part ? $date_part . ' ' . ( $time_part ? $time_part . ':00' : '00:00:00' ) : '';
 
@@ -1636,12 +1650,15 @@ class HCJM_Admin {
                     <tr>
                         <th><?php esc_html_e( 'Status', HCJM_TEXT_DOMAIN ); ?></th>
                         <td>
-                            <label><input type="radio" name="status" value="planned" id="hcjm_status_planned" <?php checked( $status_val, 'planned' ); ?>> <?php esc_html_e( 'Plánováno', HCJM_TEXT_DOMAIN ); ?></label>
+                            <label><input type="radio" name="status" value="planned"   id="hcjm_status_planned"   <?php checked( $status_val, 'planned' ); ?>> <?php esc_html_e( 'Plánováno', HCJM_TEXT_DOMAIN ); ?></label>
                             &nbsp;&nbsp;
-                            <label><input type="radio" name="status" value="played"  id="hcjm_status_played"  <?php checked( $status_val, 'played' ); ?>> <?php esc_html_e( 'Odehráno', HCJM_TEXT_DOMAIN ); ?></label>
+                            <label><input type="radio" name="status" value="played"    id="hcjm_status_played"    <?php checked( $status_val, 'played' ); ?>> <?php esc_html_e( 'Odehráno', HCJM_TEXT_DOMAIN ); ?></label>
+                            &nbsp;&nbsp;
+                            <label><input type="radio" name="status" value="cancelled" id="hcjm_status_cancelled" <?php checked( $status_val, 'cancelled' ); ?>> <?php esc_html_e( 'Zrušeno', HCJM_TEXT_DOMAIN ); ?></label>
+                            <p class="description"><?php esc_html_e( 'Zrušené zápasy se zobrazí ve výpisu zápasů, ale ne v dalším zápase (hcjm_next_match).', HCJM_TEXT_DOMAIN ); ?></p>
                         </td>
                     </tr>
-                    <tr id="hcjm_score_row" style="<?php echo $status_val !== 'played' ? 'display:none' : ''; ?>">
+                    <tr id="hcjm_score_row" style="<?php echo $status_val === 'played' ? '' : 'display:none'; ?>">
                         <th><?php esc_html_e( 'Výsledek', HCJM_TEXT_DOMAIN ); ?></th>
                         <td>
                             <input type="number" name="score_home" class="small-text" min="0" max="99" value="<?php echo esc_attr( $score_home_val ); ?>" placeholder="0">

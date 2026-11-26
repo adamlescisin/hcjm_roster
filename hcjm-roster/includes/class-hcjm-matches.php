@@ -53,7 +53,14 @@ class HCJM_Matches {
         if ( $match->score_home === null || $match->score_away === null ) {
             return '–';
         }
-        return esc_html( $match->score_home . ':' . $match->score_away );
+        // score_home = HCJM's goals, score_away = opponent's goals (always).
+        // Hockey notation puts the HOME side first regardless of who we are.
+        $ours   = (int) $match->score_home;
+        $theirs = (int) $match->score_away;
+        if ( $match->is_home ) {
+            return esc_html( $ours . ':' . $theirs );
+        }
+        return esc_html( $theirs . ':' . $ours );
     }
 
     /**
@@ -73,6 +80,29 @@ class HCJM_Matches {
             return null; // draw — caller treats null as draw
         }
         return $ours > $theirs;
+    }
+
+    /**
+     * Get a correct UTC timestamp for a match's stored local date/time.
+     *
+     * match_date is stored as Czech local time. Using strtotime() treats it as
+     * UTC and then wp_date() adds the Prague offset (+2h), causing a 2-hour
+     * display shift. DateTimeImmutable + wp_timezone() anchors the stored value
+     * to the correct timezone before extracting the Unix timestamp.
+     *
+     * @param object $match
+     * @return int 0 if no date or parse failure
+     */
+    public static function get_match_timestamp( object $match ): int {
+        if ( ! $match->match_date ) {
+            return 0;
+        }
+        try {
+            $dt = new DateTimeImmutable( $match->match_date, wp_timezone() );
+            return $dt->getTimestamp();
+        } catch ( Exception $e ) {
+            return 0;
+        }
     }
 
     /**

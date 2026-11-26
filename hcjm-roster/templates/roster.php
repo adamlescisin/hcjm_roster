@@ -18,11 +18,22 @@ $positions          = HCJM_Players::positions();
 $placeholder_att_id = (int) get_option( 'hcjm_placeholder_avatar', 0 );
 $placeholder_global = $placeholder_att_id ? wp_get_attachment_image_url( $placeholder_att_id, 'medium' ) : '';
 $show_avatars       = $show_avatars ?? true;
+$uid                = 'hcjm-roster-' . wp_generate_password( 6, false, false );
 ?>
-<div class="hcjm hcjm-roster<?php echo $show_avatars ? '' : ' hcjm-roster-noavatar'; ?>">
+<div class="hcjm hcjm-roster<?php echo $show_avatars ? '' : ' hcjm-roster-noavatar'; ?>" id="<?php echo esc_attr( $uid ); ?>">
     <?php if ( empty( $players ) ) : ?>
         <p class="hcjm-empty"><?php esc_html_e( 'Soupiska pro tuto sezónu není zatím k dispozici.', HCJM_TEXT_DOMAIN ); ?></p>
-    <?php elseif ( ! $show_avatars ) : ?>
+    <?php else : ?>
+
+    <?php if ( $has_jersey ) : ?>
+    <div class="hcjm-roster-sort" role="group" aria-label="<?php esc_attr_e( 'Řazení', HCJM_TEXT_DOMAIN ); ?>">
+        <span class="hcjm-sort-label"><?php esc_html_e( 'Řazení:', HCJM_TEXT_DOMAIN ); ?></span>
+        <button class="hcjm-filter-btn hcjm-sort-btn active" data-sort="jersey"><?php esc_html_e( 'Číslo dresu', HCJM_TEXT_DOMAIN ); ?></button>
+        <button class="hcjm-filter-btn hcjm-sort-btn" data-sort="last"><?php esc_html_e( 'Příjmení', HCJM_TEXT_DOMAIN ); ?></button>
+    </div>
+    <?php endif; ?>
+
+    <?php if ( ! $show_avatars ) : ?>
         <!-- Compact list: no avatars -->
         <div class="hcjm-roster-table-wrap">
             <table class="hcjm-roster-table">
@@ -38,8 +49,13 @@ $show_avatars       = $show_avatars ?? true;
                     <?php foreach ( $players as $player ) :
                         $m         = HCJM_Players::get_meta( $player->ID );
                         $pos_label = $positions[ $m['position'] ] ?? $m['position'];
+                        $jersey_sort = ( $m['jersey'] !== '' ) ? (int) $m['jersey'] : 9999;
+                        $last_sort   = mb_strtolower( $m['first_name'] );
                     ?>
-                    <tr class="hcjm-rt-row" data-position="<?php echo esc_attr( $m['position'] ); ?>">
+                    <tr class="hcjm-rt-row"
+                        data-position="<?php echo esc_attr( $m['position'] ); ?>"
+                        data-jersey="<?php echo esc_attr( $jersey_sort ); ?>"
+                        data-last="<?php echo esc_attr( $last_sort ); ?>">
                         <?php if ( $has_jersey ) : ?>
                             <td class="hcjm-rt-jersey"><strong><?php echo esc_html( $m['jersey'] ); ?></strong></td>
                         <?php endif; ?>
@@ -65,6 +81,8 @@ $show_avatars       = $show_avatars ?? true;
                 $photo_full_url = $m['photo_id'] ? wp_get_attachment_image_url( $m['photo_id'], 'full' ) : '';
                 $pos_label = $positions[ $m['position'] ] ?? $m['position'];
                 $initials  = mb_substr( $m['last_name'], 0, 1 ) . mb_substr( $m['first_name'], 0, 1 );
+                $jersey_sort = ( $m['jersey'] !== '' ) ? (int) $m['jersey'] : 9999;
+                $last_sort   = mb_strtolower( $m['first_name'] );
             ?>
                 <div class="hcjm-card hcjm-player-card" data-position="<?php echo esc_attr( $m['position'] ); ?>">
                     <div class="hcjm-card-photo<?php echo $photo_full_url ? ' hcjm-photo-clickable' : ''; ?>"
@@ -102,6 +120,7 @@ $show_avatars       = $show_avatars ?? true;
                 </div>
             <?php endforeach; ?>
         </div>
+    <?php endif; ?>
     <?php endif; ?>
 </div>
 
