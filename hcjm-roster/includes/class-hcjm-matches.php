@@ -76,12 +76,6 @@ class HCJM_Matches {
     }
 
     /**
-     * Format the match date for display.
-     *
-     * @param object $match
-     * @return string
-     */
-    /**
      * Parse match_date (stored as local Czech time) into a Unix timestamp.
      * Using DateTimeImmutable + wp_timezone() avoids the +1h shift that
      * strtotime() causes when the server runs in UTC.
