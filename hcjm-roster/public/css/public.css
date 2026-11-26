@@ -279,6 +279,23 @@
   line-height: 1.6;
 }
 
+/* ── Roster sort toggle ───────────────────────────────────────── */
+.hcjm-roster-sort {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.hcjm-sort-label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: .65;
+  margin-right: 2px;
+}
+/* Sort toggle inherits .hcjm-filter-btn styles; only active color is overridden */
+.hcjm-sort-btn.active { background: #d9000d; border-color: #d9000d; color: #fff; }
+
 /* ── Card grid — matches DS Card layout ──────────────────────── */
 .hcjm-cards {
   display: grid;
@@ -765,6 +782,12 @@
   font-size: 0.72rem;
   font-weight: var(--font-weight-medium);
   color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+.hcjm-cancelled {
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-medium);
+  color: #e05252;
   letter-spacing: 0.02em;
 }
 

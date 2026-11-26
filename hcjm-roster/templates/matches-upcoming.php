@@ -82,6 +82,8 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
                             <?php else : ?>
                                 <span class="hcjm-result hcjm-result-draw"><?php esc_html_e( 'Remíza', HCJM_TEXT_DOMAIN ); ?></span>
                             <?php endif; ?>
+                        <?php elseif ( $match->status === 'cancelled' ) : ?>
+                            <span class="hcjm-cancelled"><?php esc_html_e( 'Zrušeno', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php else : ?>
                             <span class="hcjm-planned"><?php esc_html_e( 'Plánováno', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php endif; ?>
