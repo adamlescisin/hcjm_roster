@@ -24,10 +24,11 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
     <?php else : ?>
         <div class="hcjm-matches-list">
             <?php foreach ( $matches as $match ) :
-                $won       = HCJM_Matches::hcjm_won( $match );
-                $score     = HCJM_Matches::format_score( $match );
-                $date      = HCJM_Matches::format_date( $match );
-                $is_played = $match->status === 'played';
+                $won         = HCJM_Matches::hcjm_won( $match );
+                $score       = HCJM_Matches::format_score( $match );
+                $date        = HCJM_Matches::format_date( $match );
+                $is_played   = $match->status === 'played';
+                $result_type = $match->result_type ?? null;
 
                 // Day-of-week prefix
                 $ts         = HCJM_Matches::get_match_timestamp( $match );
@@ -75,6 +76,11 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
                         <?php endif; ?>
                         <?php if ( $is_played ) : ?>
                             <strong class="hcjm-score"><?php echo $score; ?></strong>
+                            <?php if ( $result_type === 'overtime' ) : ?>
+                                <span class="hcjm-result-type">p</span>
+                            <?php elseif ( $result_type === 'shootout' ) : ?>
+                                <span class="hcjm-result-type">SN</span>
+                            <?php endif; ?>
                             <?php if ( $won === true ) : ?>
                                 <span class="hcjm-result hcjm-result-win"><?php esc_html_e( 'Výhra', HCJM_TEXT_DOMAIN ); ?></span>
                             <?php elseif ( $won === false ) : ?>

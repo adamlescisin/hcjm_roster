@@ -21,9 +21,10 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
     <?php else : ?>
         <div class="hcjm-matches-list">
             <?php foreach ( $matches as $match ) :
-                $won   = HCJM_Matches::hcjm_won( $match );
-                $score = HCJM_Matches::format_score( $match );
-                $date  = HCJM_Matches::format_date( $match );
+                $won         = HCJM_Matches::hcjm_won( $match );
+                $score       = HCJM_Matches::format_score( $match );
+                $date        = HCJM_Matches::format_date( $match );
+                $result_type = $match->result_type ?? null;
 
                 $ts       = HCJM_Matches::get_match_timestamp( $match );
                 $day_abbr = $ts ? ( $days_cs[ (int) wp_date( 'N', $ts ) ] ?? '' ) : '';
@@ -64,6 +65,11 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
                             <span class="hcjm-friendly-badge"><?php esc_html_e( 'Přátelský', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php endif; ?>
                         <strong class="hcjm-score"><?php echo $score; ?></strong>
+                        <?php if ( $result_type === 'overtime' ) : ?>
+                            <span class="hcjm-result-type">p</span>
+                        <?php elseif ( $result_type === 'shootout' ) : ?>
+                            <span class="hcjm-result-type">SN</span>
+                        <?php endif; ?>
                         <?php if ( $won === true ) : ?>
                             <span class="hcjm-result hcjm-result-win"><?php esc_html_e( 'Výhra', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php elseif ( $won === false ) : ?>

@@ -776,6 +776,18 @@
 .hcjm-result-win  { background: var(--border-win);  color: var(--_white); }
 .hcjm-result-loss { background: var(--border-loss); color: var(--_white); }
 .hcjm-result-draw { background: var(--border-draw); color: var(--_white); }
+.hcjm-result-type {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle, rgba(255,255,255,.18));
+  border-radius: var(--radius-full);
+  padding: 1px 5px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
 
 /* Planned status */
 .hcjm-planned {
