@@ -164,16 +164,30 @@ class HCJM_Updater {
 		}
 
 		global $wp_filesystem;
-		$target = trailingslashit( dirname( $source ) ) . self::PLUGIN_DIR . '/';
 
+		// GitHub archives the whole repo, so when the plugin lives in a subfolder
+		// (hcjm-roster/) the zip extracts to: {repo}-{tag}/hcjm-roster/
+		// Detect that case and promote the subfolder to be the source.
+		$nested = trailingslashit( $source ) . self::PLUGIN_DIR . '/';
+		if ( $wp_filesystem->exists( $nested ) ) {
+			$target = trailingslashit( dirname( $source ) ) . self::PLUGIN_DIR . '/';
+			if ( $wp_filesystem->exists( $target ) ) {
+				$wp_filesystem->delete( $target, true );
+			}
+			if ( $wp_filesystem->move( $nested, $target ) ) {
+				$wp_filesystem->delete( $source, true ); // remove the now-empty wrapper dir
+				return $target;
+			}
+		}
+
+		// Fallback: plugin files are at the zip root — just rename the folder.
+		$target = trailingslashit( dirname( $source ) ) . self::PLUGIN_DIR . '/';
 		if ( trailingslashit( $source ) === $target ) {
 			return $source;
 		}
-
 		if ( $wp_filesystem->exists( $target ) ) {
 			$wp_filesystem->delete( $target, true );
 		}
-
 		if ( $wp_filesystem->move( $source, $target ) ) {
 			return $target;
 		}
