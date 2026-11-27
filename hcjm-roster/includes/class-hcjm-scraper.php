@@ -222,9 +222,26 @@ class HCJM_Scraper {
         // DB convention: score_home = HCJM goals, score_away = opponent goals.
         $raw_home_goals = isset( $item['homeScore'] ) ? (int) $item['homeScore'] : ( isset( $item['score_home'] ) ? (int) $item['score_home'] : null );
         $raw_away_goals = isset( $item['awayScore'] ) ? (int) $item['awayScore'] : ( isset( $item['score_away'] ) ? (int) $item['score_away'] : null );
+        $result_type    = null;
         if ( $raw_home_goals !== null && $raw_away_goals !== null ) {
             $score_home = $is_home ? $raw_home_goals : $raw_away_goals;
             $score_away = $is_home ? $raw_away_goals : $raw_home_goals;
+            // Detect overtime/shootout from API field or score string suffix.
+            $score_str = strtolower( (string) ( $item['score'] ?? $item['result'] ?? '' ) );
+            if ( isset( $item['resultType'] ) ) {
+                $rt = strtolower( (string) $item['resultType'] );
+                if ( str_contains( $rt, 'shoot' ) || $rt === 'sn' ) {
+                    $result_type = 'shootout';
+                } elseif ( str_contains( $rt, 'over' ) || $rt === 'p' ) {
+                    $result_type = 'overtime';
+                } else {
+                    $result_type = 'regular';
+                }
+            } elseif ( preg_match( '/\d+\s*:\s*\d+\s*(sn|p)\b/i', $score_str, $rm ) ) {
+                $result_type = strtolower( $rm[1] ) === 'sn' ? 'shootout' : 'overtime';
+            } else {
+                $result_type = 'regular';
+            }
         } else {
             $score_home = null;
             $score_away = null;
@@ -250,6 +267,7 @@ class HCJM_Scraper {
             'status'      => $status,
             'external_id' => $ext_id ?: md5( $match_date . $home_name . $away_name ),
             'round'       => sanitize_text_field( (string) ( $item['round'] ?? $item['roundNumber'] ?? '' ) ),
+            'result_type' => $result_type,
         ];
     }
 
@@ -414,11 +432,20 @@ class HCJM_Scraper {
         $score_away = null;
         $status     = 'planned';
 
-        if ( $status_raw && preg_match( '/(\d+)\s*:\s*(\d+)/', $status_raw, $sm ) ) {
+        $result_type = null;
+        if ( $status_raw && preg_match( '/(\d+)\s*:\s*(\d+)\s*(sn|p)?/i', $status_raw, $sm ) ) {
             // Website shows HOME:AWAY; swap when HCJM is the away team.
             $score_home = $is_home ? (int) $sm[1] : (int) $sm[2];
             $score_away = $is_home ? (int) $sm[2] : (int) $sm[1];
             $status     = 'played';
+            $suffix     = strtolower( $sm[3] ?? '' );
+            if ( $suffix === 'sn' ) {
+                $result_type = 'shootout';
+            } elseif ( $suffix === 'p' ) {
+                $result_type = 'overtime';
+            } else {
+                $result_type = 'regular';
+            }
         }
 
         // External ID from any link in the row
@@ -451,6 +478,7 @@ class HCJM_Scraper {
             'status'      => $status,
             'external_id' => $external_id,
             'round'       => '',
+            'result_type' => $result_type,
         ];
     }
 

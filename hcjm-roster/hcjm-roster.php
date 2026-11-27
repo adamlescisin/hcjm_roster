@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'HCJM_VERSION', '2.5.4' );
+define( 'HCJM_VERSION', '2.5.5' );
 define( 'HCJM_PLUGIN_FILE', __FILE__ );
 define( 'HCJM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCJM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -45,7 +45,7 @@ register_activation_hook( __FILE__, array( 'HCJM_Activator', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'HCJM_Deactivator', 'deactivate' ) );
 
 add_action( 'plugins_loaded', static function (): void {
-    if ( version_compare( (string) get_option( 'hcjm_db_version', '0' ), '1.1.0', '<' ) ) {
+    if ( version_compare( (string) get_option( 'hcjm_db_version', '0' ), '1.2.0', '<' ) ) {
         HCJM_Activator::run_db_upgrade();
     }
 } );

@@ -38,6 +38,7 @@ class HCJM_Activator {
             external_id   VARCHAR(100)        NOT NULL DEFAULT '',
             round         VARCHAR(50)                  DEFAULT NULL,
             is_friendly   TINYINT(1)          NOT NULL DEFAULT 0,
+            result_type   VARCHAR(20)                  DEFAULT NULL,
             created_at    DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at    DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
@@ -49,7 +50,7 @@ class HCJM_Activator {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta( $sql );
 
-        update_option( 'hcjm_db_version', '1.1.0' );
+        update_option( 'hcjm_db_version', '1.2.0' );
     }
 
     private static function insert_default_teams(): void {
