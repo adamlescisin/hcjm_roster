@@ -68,7 +68,16 @@ class HCJM_Updater {
 	}
 
 	private function download_url( object $release ): string {
-		// Use the stable GitHub archive URL (no API rate-limit on download).
+		// Prefer the hcjm-roster.zip asset built by GitHub Actions (correct structure,
+		// no redirects). Fall back to the GitHub archive URL if the asset isn't there.
+		if ( ! empty( $release->assets ) ) {
+			foreach ( $release->assets as $asset ) {
+				if ( 'hcjm-roster.zip' === $asset->name && ! empty( $asset->browser_download_url ) ) {
+					return $asset->browser_download_url;
+				}
+			}
+		}
+		// Fallback: raw archive (may have nested folder — only used for older releases).
 		return 'https://github.com/' . self::GITHUB_USER . '/' . self::GITHUB_REPO
 			. '/archive/refs/tags/' . rawurlencode( $release->tag_name ) . '.zip';
 	}
@@ -165,26 +174,26 @@ class HCJM_Updater {
 
 		global $wp_filesystem;
 
-		// GitHub archives the whole repo, so when the plugin lives in a subfolder
-		// (hcjm-roster/) the zip extracts to: {repo}-{tag}/hcjm-roster/
-		// Detect that case and promote the subfolder to be the source.
+		$target = trailingslashit( dirname( $source ) ) . self::PLUGIN_DIR . '/';
+
+		// Case A: Actions-built zip extracts directly to hcjm-roster/ — already correct.
+		if ( trailingslashit( $source ) === $target ) {
+			return $source;
+		}
+
+		// Case B: GitHub archive zip extracts to {repo}-{tag}/hcjm-roster/ (nested).
 		$nested = trailingslashit( $source ) . self::PLUGIN_DIR . '/';
 		if ( $wp_filesystem->exists( $nested ) ) {
-			$target = trailingslashit( dirname( $source ) ) . self::PLUGIN_DIR . '/';
 			if ( $wp_filesystem->exists( $target ) ) {
 				$wp_filesystem->delete( $target, true );
 			}
 			if ( $wp_filesystem->move( $nested, $target ) ) {
-				$wp_filesystem->delete( $source, true ); // remove the now-empty wrapper dir
+				$wp_filesystem->delete( $source, true );
 				return $target;
 			}
 		}
 
-		// Fallback: plugin files are at the zip root — just rename the folder.
-		$target = trailingslashit( dirname( $source ) ) . self::PLUGIN_DIR . '/';
-		if ( trailingslashit( $source ) === $target ) {
-			return $source;
-		}
+		// Case C: Archive zip extracts to some other folder name at the root — rename it.
 		if ( $wp_filesystem->exists( $target ) ) {
 			$wp_filesystem->delete( $target, true );
 		}
