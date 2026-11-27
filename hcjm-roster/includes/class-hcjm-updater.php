@@ -27,6 +27,8 @@ class HCJM_Updater {
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'inject_update' ] );
 		add_filter( 'plugins_api',                           [ $this, 'plugin_info'   ], 10, 3 );
 		add_filter( 'upgrader_source_selection',             [ $this, 'fix_source_dir'], 10, 4 );
+		add_filter( 'plugin_action_links_' . $this->plugin_slug, [ $this, 'action_links' ] );
+		add_action( 'admin_init',                            [ $this, 'handle_check'  ] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -160,6 +162,35 @@ class HCJM_Updater {
 			'last_updated'  => $release->published_at ?? '',
 			'sections'      => [ 'changelog' => $changelog ],
 		];
+	}
+
+	// -------------------------------------------------------------------------
+	// "Check for updates" action link on the Plugins page
+	// -------------------------------------------------------------------------
+
+	public function action_links( array $links ): array {
+		$check_url = wp_nonce_url(
+			add_query_arg( 'hcjm_check_update', '1', admin_url( 'plugins.php' ) ),
+			'hcjm_check_update'
+		);
+		$links[] = '<a href="' . esc_url( $check_url ) . '">' . esc_html__( 'Check for updates', 'hcjm-roster' ) . '</a>';
+		return $links;
+	}
+
+	public function handle_check(): void {
+		if (
+			! isset( $_GET['hcjm_check_update'] ) ||
+			! current_user_can( 'update_plugins' ) ||
+			! check_admin_referer( 'hcjm_check_update' )
+		) {
+			return;
+		}
+		// Clear cached release info and WP's plugin update transient, then redirect
+		// to the Updates page so WP re-checks immediately.
+		delete_transient( self::CACHE_KEY );
+		delete_site_transient( 'update_plugins' );
+		wp_safe_redirect( admin_url( 'update-core.php' ) );
+		exit;
 	}
 
 	// -------------------------------------------------------------------------
