@@ -230,9 +230,9 @@ class HCJM_Scraper {
             $score_str = strtolower( (string) ( $item['score'] ?? $item['result'] ?? '' ) );
             if ( isset( $item['resultType'] ) ) {
                 $rt = strtolower( (string) $item['resultType'] );
-                if ( str_contains( $rt, 'shoot' ) || $rt === 'sn' ) {
+                if ( false !== strpos( $rt, 'shoot' ) || $rt === 'sn' ) {
                     $result_type = 'shootout';
-                } elseif ( str_contains( $rt, 'over' ) || $rt === 'p' ) {
+                } elseif ( false !== strpos( $rt, 'over' ) || $rt === 'p' ) {
                     $result_type = 'overtime';
                 } else {
                     $result_type = 'regular';
