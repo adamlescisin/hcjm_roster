@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:       HCJM Roster
- * Plugin URI:        https://hcjuniormělník.cz
+ * Plugin URI:        https://hcjuniormelnik.cz
  * Description:       Soupiska, personál a zápasy pro HC Junior Mělník
- * Version:           1.0.0
+ * Version:           2.6.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            HC Junior Mělník
- * Author URI:        https://hcjuniormělník.cz
+ * Author URI:        https://hcjuniormelnik.cz
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       hcjm-roster
