@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'HCJM_VERSION', '2.5.7' );
+define( 'HCJM_VERSION', '2.5.8' );
 define( 'HCJM_PLUGIN_FILE', __FILE__ );
 define( 'HCJM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCJM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -38,6 +38,7 @@ require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-player-importer.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-cron.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-styles.php';
 require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-shortcodes.php';
+require_once HCJM_PLUGIN_DIR . 'includes/class-hcjm-updater.php';
 require_once HCJM_PLUGIN_DIR . 'admin/class-hcjm-admin.php';
 require_once HCJM_PLUGIN_DIR . 'public/class-hcjm-public.php';
 
@@ -116,6 +117,7 @@ function hcjm_load_textdomain(): void {
 }
 
 hcjm_run();
+new HCJM_Updater( __FILE__ );
 
 add_action( 'after_setup_theme', static function (): void {
     add_image_size( 'hcjm_player', 600, 900, false );
