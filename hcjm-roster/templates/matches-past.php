@@ -64,12 +64,9 @@ $days_cs = [ 1 => 'Po', 2 => 'Út', 3 => 'St', 4 => 'Čt', 5 => 'Pá', 6 => 'So'
                         <?php if ( ! empty( $match->is_friendly ) ) : ?>
                             <span class="hcjm-friendly-badge"><?php esc_html_e( 'Přátelský', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php endif; ?>
-                        <strong class="hcjm-score"><?php echo $score; ?></strong>
-                        <?php if ( $result_type === 'overtime' ) : ?>
-                            <span class="hcjm-result-type">p</span>
-                        <?php elseif ( $result_type === 'shootout' ) : ?>
-                            <span class="hcjm-result-type">SN</span>
-                        <?php endif; ?>
+                        <span class="hcjm-score-wrap">
+                            <strong class="hcjm-score"><?php echo $score; ?></strong><?php if ( $result_type === 'overtime' ) : ?><span class="hcjm-result-type">p</span><?php elseif ( $result_type === 'shootout' ) : ?><span class="hcjm-result-type">SN</span><?php endif; ?>
+                        </span>
                         <?php if ( $won === true ) : ?>
                             <span class="hcjm-result hcjm-result-win"><?php esc_html_e( 'Výhra', HCJM_TEXT_DOMAIN ); ?></span>
                         <?php elseif ( $won === false ) : ?>
